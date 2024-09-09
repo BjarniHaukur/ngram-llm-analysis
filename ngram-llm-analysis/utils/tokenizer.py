@@ -4,7 +4,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import Counter
 
-CHECKPOINT_PATH = Path("checkpoints/tokenizer/")
+CHECKPOINT_PATH = Path("../checkpoints/tokenizer/")
 
 BOS, BOS_ID = "<bos>", 0
 EOS, EOS_ID = "<eos>", 1
@@ -69,7 +69,7 @@ class BPETokenizer:
 
     def save(self, filename:str):
         CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
-        filepath = CHECKPOINT_PATH / filename
+        filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump({
                 'chr_to_ids': self.chr_to_ids,
@@ -78,7 +78,7 @@ class BPETokenizer:
 
     @classmethod
     def load(cls, filename:str):
-        filepath = CHECKPOINT_PATH / filename
+        filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
         with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
         tokenizer = cls()
@@ -166,17 +166,15 @@ if __name__ == "__main__":
     random.seed(1337)
 
     parser = argparse.ArgumentParser(description="Fit a Byte-Pair Encoding tokenizer")
-    parser.add_argument("--num_train_files", type=int, default=100)
+    parser.add_argument("data_name", type=str)
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--num_chunks", type=int, default=4)
     parser.add_argument("--tokenizer_name", type=str, default="my_tokenizer")
     args = parser.parse_args()
 
-    train_files = open("data/py150k/python100k_train.txt", "r", encoding="utf-8").read().split("\n")[:-1]
-    train_texts = [
-        open("data/py150k/" + path, encoding="iso-8859-1").read()
-        for path in random.sample(train_files, args.num_train_files)
-    ]
+    with open("../data/" + (args.data_name if args.data_name.endswith(".txt") else args.data_name + ".txt"), "r") as f:
+        f.readline()  # the first line is just "text"
+        data = f.read()
 
-    tok = BPETokenizer.fit("".join(train_texts), args.iterations, args.num_chunks)
+    tok = BPETokenizer.fit(data, args.iterations, args.num_chunks)
     tok.save(args.tokenizer_name)
