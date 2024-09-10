@@ -1,6 +1,5 @@
-import random
-
-from .tokenizer import BOS_ID, EOS_ID
+try: from .tokenizer import BOS_ID, EOS_ID
+except ImportError: from tokenizer import BOS_ID, EOS_ID
 
 import torch
 import torch.nn.functional as F

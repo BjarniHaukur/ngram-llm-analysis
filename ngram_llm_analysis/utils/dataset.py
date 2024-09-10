@@ -2,7 +2,8 @@ from typing import Literal
 from functools import lru_cache
 from pathlib import Path
 
-from .tokenizer import BPETokenizer
+try: from .tokenizer import BPETokenizer # super lazy
+except ImportError: from tokenizer import BPETokenizer
 
 import numpy as np
 import torch
