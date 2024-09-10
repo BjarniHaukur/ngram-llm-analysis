@@ -35,9 +35,9 @@ Project Manager: Bjarni
 - We developed the project plan in two stages: first, by establishing a clear structure, and then by highlighting the key points. Since we exceeded the two-page limit, we shortened sections on motivation and background, but kept these ideas for the final report.
 
 ### Peer Group Meeting
-- We got in contact with them, the meeting will be on 09/10.
+- We got in contact with the peer group and decided to set up a shared Discord Server. The first meeting was scheduled for the 9th of September.
 
-### Sue met for an hour to discuss our approaches, possible ways to improve the project. We also talked about the timeline of our tasks. pervisor Meeting
+### Supervisor Meeting
 - We had a one-hour meeting to discuss our approaches and explore potential improvements to the project. We also reviewed the timeline for completing our tasks.
 - Johan explained his choice of the N-Gram topic, highlighting its relevance to the explainability of transformers. He provided an example from the Swedish language, demonstrating how a single syllable can change the entire context.
 - He also mentioned the possibility of acquiring resources from KTH to support our project.
