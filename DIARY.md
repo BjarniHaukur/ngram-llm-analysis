@@ -14,6 +14,12 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
+- 
+
 ---
 
 ## Week 37 (September 9 - September 15)
@@ -28,6 +34,12 @@
 - 
 
 ### Felix
+- 
+
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
 - 
 
 ---
@@ -46,6 +58,12 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
+- 
+
 ---
 
 ## Week 39 (September 23 - September 29)
@@ -60,6 +78,12 @@
 - 
 
 ### Felix
+- 
+
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
 - 
 
 ---
@@ -78,6 +102,12 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
+- 
+
 ---
 
 ## Week 41 (October 7 - October 13)
@@ -94,6 +124,11 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
+- 
 
 ---
 
@@ -109,6 +144,12 @@
 - 
 
 ### Felix
+- 
+
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
 - 
 
 ---
@@ -127,6 +168,12 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
+- 
+
 ---
 
 ## Week 44 (October 28 - November 3)
@@ -141,6 +188,12 @@
 - 
 
 ### Felix
+- 
+
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
 - 
 
 ---
@@ -159,6 +212,12 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
+- 
+
 ---
 
 ## Week 46 (November 11 - November 17)
@@ -173,6 +232,12 @@
 - 
 
 ### Felix
+- 
+
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
 - 
 
 ---
@@ -191,6 +256,12 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
+- 
+
 ---
 
 ## Week 48 (November 25 - December 1)
@@ -205,6 +276,12 @@
 - 
 
 ### Felix
+- 
+
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
 - 
 
 ---
@@ -223,6 +300,12 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
+- 
+
 ---
 
 ## Week 50 (December 9 - December 15)
@@ -237,6 +320,12 @@
 - 
 
 ### Felix
+- 
+
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
 - 
 
 ---
@@ -255,6 +344,12 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
+- 
+
 ---
 
 ## Week 52 (December 23 - December 29)
@@ -269,6 +364,12 @@
 - 
 
 ### Felix
+- 
+
+### Peer Group Meeting
+- 
+
+### Supervisor Meeting
 - 
 
 ---
@@ -287,5 +388,8 @@
 ### Felix
 - 
 
+### Peer Group Meeting
+- 
 
-
+### Supervisor Meeting
+- 
