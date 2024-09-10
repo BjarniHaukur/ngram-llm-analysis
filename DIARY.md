@@ -25,20 +25,22 @@ Project Manager: Bjarni
 
 ### Felix
 - **Number of hours this week: 5.5**
-- Focus was set for me  on organizing the collaboration part of the project and the individual skill set of aech group membe - we built a sttrategy on how we want to work together as a team and which met.
-- Research on papers used for our project plan focussing on how N-Gram statistics has been applied to AI in the past using Web of Science to identify the most relevant sources and potential hot papers.
-- Rewriting bullet points into continous sentences. rof 
+- My primary focus was on organizing the collaboration aspects of the project and aligning the individual skill sets of each group member. We developed a strategy outlining how we intended to work together as a team, along with the methods necessary for our approach.
+- I conducted research for our project plan, focusing on how N-Gram statistics have been historically applied to AI. Using the Web of Science, I identified the most relevant sources and potential high-impact papers.
+- I revised and converted bullet points into continuous sentences to enhance the overall readability and flow of the content.
 
 ### Group Meeting
-- We had a meeting about which projects we want to do and sent the required email.
-- We got to know each other and talked a bit about the chosen project, then we all read Nguyen's research paper.
-- We wrote the project plan.
+- We held a meeting to discuss potential projects, reviewed all available topics, and reached a consensus on a common direction. Following this, we sent the necessary emails.
+- During the meeting, we introduced ourselves, discussed our skills and initial thoughts, and briefly talked about the chosen project. Afterwards, we all read Nguyen’s research paper.
+- We developed the project plan in two stages: first, by establishing a clear structure, and then by highlighting the key points. Since we exceeded the two-page limit, we shortened sections on motivation and background, but kept these ideas for the final report.
 
 ### Peer Group Meeting
 - We got in contact with them, the meeting will be on 09/10.
 
-### Supervisor Meeting
-- We met for an hour to discuss our approaches, possible ways to improve the project. We also talked about the timeline of our tasks. 
+### Sue met for an hour to discuss our approaches, possible ways to improve the project. We also talked about the timeline of our tasks. pervisor Meeting
+- We had a one-hour meeting to discuss our approaches and explore potential improvements to the project. We also reviewed the timeline for completing our tasks.
+- Johan explained his choice of the N-Gram topic, highlighting its relevance to the explainability of transformers. He provided an example from the Swedish language, demonstrating how a single syllable can change the entire context.
+- He also mentioned the possibility of acquiring resources from KTH to support our project.
 
 
 ---
