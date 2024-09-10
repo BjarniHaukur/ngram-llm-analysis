@@ -1,6 +1,7 @@
 # Team Diary
 
 ## Week 36 (September 2 - September 8)
+Project Manager: Bjarni
 
 ### Bjarni
 - **Number of hours this week: 7**
@@ -43,6 +44,7 @@
 ---
 
 ## Week 37 (September 9 - September 15)
+Project Manager: Bjarni
 
 ### Bjarni
 - **Number of hours this week: TBD**
@@ -75,18 +77,19 @@
 ---
 
 ## Week 38 (September 16 - September 22)
+Project Manager: Boti
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -97,18 +100,19 @@
 ---
 
 ## Week 39 (September 23 - September 29)
+Project Manager: Felix
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -119,18 +123,19 @@
 ---
 
 ## Week 40 (September 30 - October 6)
+Project Manager: Jonas
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -141,18 +146,19 @@
 ---
 
 ## Week 41 (October 7 - October 13)
+Project Manager: Bjarni
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -163,18 +169,19 @@
 ---
 
 ## Week 42 (October 14 - October 20)
+Project Manager: Boti
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -185,18 +192,19 @@
 ---
 
 ## Week 43 (October 21 - October 27)
+Project Manager: Felix
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -207,18 +215,19 @@
 ---
 
 ## Week 44 (October 28 - November 3)
+Project Manager: Jonas
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -229,18 +238,19 @@
 ---
 
 ## Week 45 (November 4 - November 10)
+Project Manager: Bjarni
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -251,18 +261,19 @@
 ---
 
 ## Week 46 (November 11 - November 17)
+Project Manager: Boti
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -273,18 +284,19 @@
 ---
 
 ## Week 47 (November 18 - November 24)
+Project Manager: Felix
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -295,18 +307,19 @@
 ---
 
 ## Week 48 (November 25 - December 1)
+Project Manager: Jonas
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -317,18 +330,19 @@
 ---
 
 ## Week 49 (December 2 - December 8)
+Project Manager: Bjarni
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -339,18 +353,19 @@
 ---
 
 ## Week 50 (December 9 - December 15)
+Project Manager: Boti
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -361,18 +376,19 @@
 ---
 
 ## Week 51 (December 16 - December 22)
+Project Manager: Felix
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -383,18 +399,19 @@
 ---
 
 ## Week 52 (December 23 - December 29)
+Project Manager: Jonas
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
@@ -405,18 +422,19 @@
 ---
 
 ## Week 1 (December 30 - January 5)
+Project Manager: Bjarni
 
 ### Bjarni
-- 
+- **Number of hours this week: TBD**
 
 ### Boti
-- 
+- **Number of hours this week: TBD**
 
 ### Jonas
-- 
+- **Number of hours this week: TBD**
 
 ### Felix
-- 
+- **Number of hours this week: TBD**
 
 ### Peer Group Meeting
 - 
