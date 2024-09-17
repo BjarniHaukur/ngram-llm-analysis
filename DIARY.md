@@ -67,6 +67,12 @@ Project Manager: Bjarni
 
 ### Felix
 - **Number of hours this week: TBD**
+1. Literature Review on Transformer Models and N-gram Statistics
+I conducted an in-depth literature review on transformer models, with a particular emphasis on their relationship with n-gram statistics. This involved analyzing recent research papers, articles, and case studies to understand how n-gram approaches are integrated within transformer architectures. The objective was to identify methodologies that could enhance our project's performance by incorporating these statistical techniques.
+2. Attempting to Run an N-gram Statistics GitHub Library on MacBook
+I attempted to implement an open-source GitHub library designed for n-gram statistics on my MacBook. During this process, I encountered issues related to processor incompatibility. After extensive troubleshooting, I consulted with **Jonas**, who confirmed that the library is not compatible with certain MacBook processors. This setback highlighted the need to either modify the library for compatibility or seek alternative solutions that are compatible with our hardware.
+3. Studying Previous Work on Tokenizers by **Bjarni** and **Jonas**
+I invested time in understanding the previous work done by Bjarni and Jonas on tokenizers. This involved reviewing their codebases, documentation, and any supplementary materials they provided in order to further enhance my knowledge regarding AI models and close potential knowledge gaps.
 
 ### Peer Group Meeting
 - Discussed what exactly are we understanding about transformers with this method (e.g. describing language/dataset more than the transformer architecture)
