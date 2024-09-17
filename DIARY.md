@@ -75,9 +75,12 @@ I attempted to implement an open-source GitHub library designed for n-gram stati
 I invested time in understanding the previous work done by Bjarni and Jonas on tokenizers. This involved reviewing their codebases, documentation, and any supplementary materials they provided in order to further enhance my knowledge regarding AI models and close potential knowledge gaps.
 
 ### Peer Group Meeting
-- Discussed what exactly are we understanding about transformers with this method (e.g. describing language/dataset more than the transformer architecture)
-- Set a time for weekly meetings
-- We agreed have some results reproducing the paper's findings before setting goals that could be opposing each group
+1. Clarifying Our Understanding of Transformers Using This Method
+We discussed what exactly we aim to understand about transformer models through our current method. It was noted that our approach might be describing the language dataset more than providing insights into the transformer architecture itself. We need to ensure that our methodology effectively analyzes the inner workings of transformers, not just the characteristics of the dataset.
+2. Reproducing Paper Findings Before Setting Divergent Goals
+We agreed to reproduce the results of the referenced paper before establishing new objectives that could diverge between groups. This will provide a solid foundation and ensure all team members have a shared understanding of the baseline findings.
+Understanding "Model Variance" in Nguyen's Paper
+3. We discussed the meaning of "Model Variance" as presented in Nguyen's paper. We concluded that this term refers to the stochasticity and variability that occur when the same model is trained multiple times. This variance demonstrates that the findings are significant and consistently observable across different training runs, rather than being artifacts of a single instance.
 
 ### Supervisor Meeting
 - 
