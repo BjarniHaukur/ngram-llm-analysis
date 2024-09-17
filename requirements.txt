@@ -10,3 +10,4 @@ torchaudio
 # hugging face
 transformers
 tokenizers
+accelerate
