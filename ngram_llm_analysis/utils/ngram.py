@@ -1,126 +1,253 @@
-# ngram_trie_test.py
+import json
+from pathlib import Path
+
+CHECKPOINT_PATH = Path("../checkpoints/ngram/")
+CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
 
 class TrieNode:
     __slots__ = ('children', 'count')
     
     def __init__(self):
-        self.children = {}
-        self.count = 0  # Count of N-grams ending at this node
+        self.children:dict[int, TrieNode] = {} 
+        self.count:int = 0  # Count of N-grams ending at this node
+
+    def to_dict(self):
+        return {
+            'children': {k: v.to_dict() for k, v in self.children.items()},
+            'count': self.count
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        node = cls()
+        node.count = data['count']
+        node.children = {k: cls.from_dict(v) for k, v in data['children'].items()}
+        return node
 
 class NGramTrie:
-    def __init__(self):
+    """ A trie for storing N-grams of tokenized text. """
+    def __init__(self, vocab_size:int):
         self.root = TrieNode()
+        # self.vocab_size = vocab_size  # necessary for the correctness of the Kneser-Ney smoothing algorithm
+    
+    def save(self, filename:str):
+        filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump({
+                'vocab_size': self.vocab_size,
+                'root': self.root.to_dict()
+            }, f, indent=2)
+    
+    @classmethod
+    def load(cls, filename:str):
+        filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        trie = cls(data['vocab_size'])
+        trie.root = TrieNode.from_dict(data['root'])
+        return trie
+    
+    @classmethod
+    def fit(cls, tokens:list[int], ngram_length:int, vocab_size:int):
+        trie = cls(vocab_size)
+        for i in range(len(tokens) - ngram_length + 1):
+            ngram = tokens[i:i+ngram_length]
+            trie.insert(ngram)
+        return trie
     
     def insert(self, ngram):
         node = self.root
         for token in ngram:
-            if token not in node.children:
-                node.children[token] = TrieNode()
+            if token not in node.children: node.children[token] = TrieNode()
             node = node.children[token]
-        node.count += 1
-    
-    def keep(self, condition):
-        def _keep(node, depth):
-            keys_to_delete = []
-            for key, child in node.children.items():
-                if not _keep(child, depth + 1):
-                    keys_to_delete.append(key)
-            for key in keys_to_delete:
-                del node.children[key]
-            return condition(node, depth) or bool(node.children)
-        _keep(self.root, 0)
-    
-    def remove(self, condition):
-        def _remove(node, depth):
-            keys_to_delete = []
-            for key, child in list(node.children.items()):
-                if condition(child, depth):
-                    keys_to_delete.append(key)
-                else:
-                    _remove(child, depth + 1)
-            for key in keys_to_delete:
-                del node.children[key]
-        _remove(self.root, 0)
-    
-    def marginalize(self, marginalize_function):
-        def _marginalize(node):
-            for child in node.children.values():
-                _marginalize(child)
-            marginalize_function(node)
-        _marginalize(self.root)
-    
-    def traverse_and_print(self, node=None, prefix=None):
-        if node is None:
-            node = self.root
-            prefix = []
-        if node.count > 0 and prefix:
-            print(f"{' '.join(prefix)}: {node.count}")
-        for token, child in node.children.items():
-            self.traverse_and_print(child, prefix + [token])
+            node.count += 1
+        
+    def find_all_nodes(self, tokens:list[int], rule_context:str|None=None)->list[TrieNode]:
+        def recursive_search(node:TrieNode, rule_context:str, index:int)->list[TrieNode]:
+            if index == len(rule_context): return [node]  # reached the end of the rule context, return this node
 
-def tokenize_text(data):
-    """Generator that yields tokenized lines from a list of strings."""
-    for line in data:
-        tokens = line.strip().split()
-        if tokens:
-            yield tokens
+            if (token:= rule_context[index]) == '*':
+                results = []
+                for child_node in node.children.values(): # try out all wildcards
+                    results.extend(recursive_search(child_node, rule_context, index + 1))
+                return results
+            elif token in node.children:
+                return recursive_search(node.children[token], rule_context, index + 1)
+            else:  # not found 
+                return []
 
-def build_trie_from_dataset(data, max_n):
-    """Builds an N-gram Trie from the dataset."""
-    trie = NGramTrie()
-    for tokens in tokenize_text(data):
-        for n in range(1, max_n + 1):
-            for i in range(len(tokens) - n + 1):
-                ngram = tokens[i:i + n]
-                trie.insert(ngram)
-    return trie
+        search_context = self._preprocess_rule_context(tokens, rule_context)
+        return recursive_search(self.root, search_context, 0)
+        
+    def _search(self, search_context:str, node:TrieNode=None, index:int=0)->int:
+        node = node or self.root  # start at root unless specified
 
-# Example usage
-if __name__ == '__main__':
-    # Dataset provided by the user
-    data = [
-        "Together, they shared the needle and sewed the button on Lily's shirt. It was not difficult for them because they were sharing and helping each other. After they finished, Lily thanked her mom for sharing the needle and fixing her shirt. They both felt happy because they had shared and worked together.",
-        "Once upon a time, there was a little car named Beep. Beep loved to go fast and play in the sun. Beep was a healthy car because he always had good fuel. Good fuel made Beep happy and strong."
-    ]
+        if index == len(search_context): return node.count  # Reached the end of the rule context
+
+        token = search_context[index]
+        total_count = 0
+        
+        if token == '*':  # explore all child nodes at this position
+            total_count += sum(self._search(search_context, child_node, index + 1) for child_node in node.children.values())
+        elif token in node.children:  # continue search
+            total_count += self._search(search_context, node.children[token], index + 1)
+        else:  # not found
+            return 0
+
+        return total_count
     
-    # Parameters
-    max_n = 5  # Maximum N-gram length
+    def _preprocess_rule_context(self, tokens:list[int], rule_context:str|None)->str:
+        if rule_context is None: return "+" * len(tokens)
+        assert len(tokens) == len(rule_context), "Tokens and rule context must be of the same length"
+        return ["*" if rule == "*" else token for token, rule in zip(tokens, rule_context) if rule != "-"]
     
-    # Build the Trie
-    print("Building the N-gram Trie...")
-    trie = build_trie_from_dataset(data, max_n)
-    print("Trie construction completed.\n")
+    def search(self, tokens:list[int], rule_context:str|None=None)->int:
+        """
+        Search the trie using tokens and rule context. '-' shortens context, '*' is wildcard and '+' is the keep.
+        
+        Example:
+            search([1,2,3], "*-+") searches anything (*) followed by 3
+            
+            search([1,2,3], "--*") searches for all ngrams of length 1
+            
+            search([1,2,3], None) is equivalent to search([1,2,3], "+++"), i.e. search for this exact ngram
+        """
+        search_context = self._preprocess_rule_context(tokens, rule_context)
+        return self._search(search_context)
     
-    # Traverse and print the Trie before applying any rules
-    print("Trie contents before applying rules:")
-    trie.traverse_and_print()
-    print("\n")
+    def unique_successor_count(self, context:list[int], context_rule:str|None=None)->int:
+        unique_successors = set()
+        for node in self.find_all_nodes(context, context_rule):
+            unique_successors.update(node.children.keys())
+        return len(unique_successors)
     
-    # Define conditions and marginalization functions
-    def remove_condition(node, depth):
-        """Condition to remove N-grams that occur less than twice."""
-        return node.count < 2
+    def continuation_count(self, token: int) -> int:
+        """Count the number of unique contexts that precede the given token."""
+        unique_contexts = set()
+        stack = [(self.root, [])]
+        while stack:
+            current_node, context = stack.pop()
+            for child_token, child_node in current_node.children.items():
+                new_context = context + [child_token]
+                if child_token == token and context:
+                    unique_contexts.add(tuple(context))
+                stack.append((child_node, new_context))
+        return len(unique_contexts)
     
-    def marginalize_function(node):
-        """Aggregates counts from child nodes."""
-        if node.children:
-            node.count = sum(child.count for child in node.children.values())
+    def total_unique_contexts(self, n:int)->int:
+        """Compute the total number of unique (n-1)-gram contexts."""
+        count = 0
+        stack = [(self.root, [])]  # Stack holds (current_node, path)
+        
+        while stack:
+            current_node, path = stack.pop()
+
+            if len(path) == n - 1:  # We only count paths of length (n-1)
+                count += 1
+                continue  # no need to go deeper for this path
+
+            # then the path is shorter so we continue exploring
+            for child_token, child_node in current_node.children.items():
+                stack.append((child_node, path + [child_token]))
+        
+        return count
     
-    # Apply the remove rule
-    print("Applying the remove rule...")
-    trie.remove(remove_condition)
-    print("Remove rule applied.\n")
-    
-    # Traverse and print the Trie after remove
-    print("Trie contents after remove:")
-    trie.traverse_and_print()
-    print("\n")
-    
-    # Apply the marginalize function
-    print("Applying marginalization...")
-    trie.marginalize(marginalize_function)
-    print("Marginalization completed.\n")
-    
-    # Traverse and print the Trie after marginalization
-    print("Trie contents after marginalization:")
-    trie.traverse_and_print()
+    def kneser_ney_smoothed_ratios(self, tokens:list[int], rule_context:str|None=None, discount:float=0.75)->list[float]:
+        """
+        Compute Kneser-Ney smoothed probability ratios for the given tokens and rule context.
+
+        Args:
+            tokens (list[int]): The sequence of tokens to compute ratios for.
+            rule_context (str): The rule context string, same as in the search method.
+
+        Returns:
+            list[float]: A list of smoothed probability ratios for each token in the sequence.
+        """
+        ratios = []
+        total_continuation = self.total_unique_contexts(len(tokens))
+
+        for i in range(len(tokens)):
+            context = tokens[:i]
+            context_rule = rule_context[:i]
+            token = tokens[i]
+
+            ngram_count = self.search(context + [token], context_rule + "+")
+            context_count = self.search(context, context_rule)
+            unique_successors = self.unique_successor_count(context, context_rule)
+            continuation_count = self.continuation_count(token)
+
+            if context_count > 0:
+                discounted_prob = max(ngram_count - discount, 0) / context_count
+                lambda_factor = (discount * unique_successors) / context_count
+                backoff_prob = continuation_count / total_continuation
+                kn_prob = discounted_prob + lambda_factor * backoff_prob
+                ratios.append(kn_prob)
+            else:
+                backoff_prob = continuation_count / total_continuation
+                ratios.append(backoff_prob)
+
+        return ratios
+        
+            
+if __name__ == "__main__":
+    trie = NGramTrie(vocab_size=10)
+    trie.insert([1, 2, 3])
+    trie.insert([1, 2, 3])
+    trie.insert([1, 2, 4])
+    trie.insert([2, 3, 4])
+    trie.insert([3, 4, 5])
+
+    # Test insertion and counts
+    count = trie.search([1, 2, 3], "+++")
+    assert count == 2, f"Test failed: Incorrect count for [1, 2, 3], expected 2 got {count}"
+    count = trie.search([1, 2, 4], "+++")
+    assert count == 1, f"Test failed: Incorrect count for [1, 2, 4], expected 1 got {count}"
+
+    # Test search with rule context
+    count = trie.search([1, 2, 3], "*++")
+    assert count == 2, f"Test failed: Incorrect count for '* 2 3', expected 2 got {count}"
+    count = trie.search([1, 2, 3], "+*+")
+    assert count == 2, f"Test failed: Incorrect count for '1 * 3', expected 2 got {count}"
+    count = trie.search([1, 2, 3], "++*")
+    assert count == 3, f"Test failed: Incorrect count for '1 2 *', expected 3 got {count}"
+    count = trie.search([1, 2, 3], "**+")
+    assert count == 2, f"Test failed: Incorrect count for '* * 3', expected 2 got {count}"
+
+    # Test different context lengths
+    count = trie.search([1, 2, 3], "-++")
+    assert count == 1, f"Test failed: Incorrect count for context '-++', expected 2 got {count}"
+    count = trie.search([1, 2, 3], "--+")
+    assert count == 1, f"Test failed: Incorrect count for context '--+', expected 2 got {count}"
+
+    # Test edge cases
+    empty_trie = NGramTrie(vocab_size=10)
+    count = empty_trie.search([1, 2, 3], "+++")
+    assert count == 0, f"Test failed: Empty trie should return 0, got {count}"
+    count = trie.search([9, 9, 9], "+++")
+    assert count == 0, f"Test failed: Non-existent n-gram should return 0, got {count}"
+
+    # Test unique_successor_count
+    unique_successors = trie.unique_successor_count([1, 2], "++")
+    assert unique_successors == 2, f"Test failed: Expected 2 unique successors for context [1, 2], got {unique_successors}"
+
+    # Test total_unique_contexts
+    total_contexts = trie.total_unique_contexts(3)
+    assert total_contexts == 3, f"Test failed: Expected 3 total unique contexts of length 2, got {total_contexts}"
+
+    # Test corrected continuation_count
+    continuation_count_3 = trie.continuation_count(3)
+    assert continuation_count_3 == 2, f"Test failed: Expected 2 unique contexts preceding token 3, got {continuation_count_3}"
+
+    # Test kneser_ney_smoothed_ratios
+    tokens = [1, 2, 3]
+    rule_context = "+++"
+    kn_ratios = trie.kneser_ney_smoothed_ratios(tokens, rule_context, discount=0.75)
+
+    # Expected Kneser-Ney probability for the last token
+    expected_kn_prob = 0.75  # Calculated based on earlier verification
+
+    # Since kn_ratios is a list of probabilities for each token, we check the last one
+    last_kn_prob = kn_ratios[-1]
+    assert abs(last_kn_prob - expected_kn_prob) < 1e-5, f"Test failed: Expected KN probability {expected_kn_prob}, got {last_kn_prob}"
+
+    print("All tests passed successfully.")
