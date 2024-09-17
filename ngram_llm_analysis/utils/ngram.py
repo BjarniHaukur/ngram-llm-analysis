@@ -20,8 +20,8 @@ class TrieNode:
     @classmethod
     def from_dict(cls, data):
         node = cls()
-        node.count = data['count']
         node.children = {k: cls.from_dict(v) for k, v in data['children'].items()}
+        node.count = data['count']
         return node
 
 class NGramTrie:
@@ -50,7 +50,7 @@ class NGramTrie:
     @classmethod
     def fit(cls, tokens:list[int], ngram_max_length:int):
         trie = cls(ngram_max_length)
-        for i in range(len(tokens) - ngram_max_length + 1):
+        for i in range(len(tokens) - ngram_max_length + 1): # sliding window over tokens
             ngram = tokens[i:i+ngram_max_length]
             trie.insert(ngram)
         return trie
@@ -58,9 +58,9 @@ class NGramTrie:
     def insert(self, ngram):
         node = self.root
         for token in ngram:
-            if token not in node.children: node.children[token] = TrieNode()
-            node = node.children[token]
-            node.count += 1
+            node.children[token] = node.children.get(token, TrieNode()) # get or create the node
+            node = node.children[token] # move to the next node
+            node.count += 1 # increment the count
         
     def find_all_nodes(self, tokens:list[int], rule_context:str|None=None)->list[TrieNode]:
         def recursive_search(node:TrieNode, rule_context:str, index:int)->list[TrieNode]:
@@ -78,23 +78,6 @@ class NGramTrie:
 
         search_context = self._preprocess_rule_context(tokens, rule_context)
         return recursive_search(self.root, search_context, 0)
-        
-    def _search(self, search_context:str, node:TrieNode=None, index:int=0)->int:
-        node = node or self.root  # start at root unless specified
-
-        if index == len(search_context): return node.count  # Reached the end of the rule context
-
-        token = search_context[index]
-        total_count = 0
-        
-        if token == '*':  # explore all child nodes at this position
-            total_count += sum(self._search(search_context, child_node, index + 1) for child_node in node.children.values())
-        elif token in node.children:  # continue search
-            total_count += self._search(search_context, node.children[token], index + 1)
-        else:  # not found
-            return 0
-
-        return total_count
     
     def _preprocess_rule_context(self, tokens:list[int], rule_context:str|None)->str:
         if rule_context is None: return "+" * len(tokens)
@@ -112,8 +95,24 @@ class NGramTrie:
             
             search([1,2,3], None) is equivalent to search([1,2,3], "+++"), i.e. search for this exact ngram
         """
+        def _search(self, search_context:str, node:TrieNode=None, index:int=0)->int:
+            node = node or self.root  # start at root unless specified
+
+            if index == len(search_context): return node.count  # Reached the end of the rule context
+
+            total_count = 0
+            
+            if (token:= search_context[index]) == '*':  # explore all child nodes at this position
+                total_count += sum(self._search(search_context, child_node, index + 1) for child_node in node.children.values())
+            elif token in node.children:  # continue search
+                total_count += self._search(search_context, node.children[token], index + 1)
+            else:  # not found
+                return 0
+
+            return total_count
+        
         search_context = self._preprocess_rule_context(tokens, rule_context)
-        return self._search(search_context)
+        return _search(search_context)
     
     def unique_successor_count(self, context:list[int], context_rule:str|None=None)->int:
         unique_successors = set()
