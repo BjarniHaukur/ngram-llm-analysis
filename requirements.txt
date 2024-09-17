@@ -7,4 +7,6 @@ torch
 torchvision
 torchaudio
 
-transformers # hugging face
+# hugging face
+transformers
+tokenizers

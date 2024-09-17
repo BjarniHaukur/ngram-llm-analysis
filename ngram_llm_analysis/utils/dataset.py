@@ -1,20 +1,17 @@
-from typing import Literal
 from functools import lru_cache
 from pathlib import Path
 
-try: from .tokenizer import BPETokenizer # super lazy
-except ImportError: from tokenizer import BPETokenizer
+try: from .tokenizer import load_tokenizer
+except ImportError: from tokenizer import load_tokenizer
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from tqdm import tqdm
 
 DATA_PATH = Path("../data/")
 
-
 class MemmapDataset(Dataset):
-    """ Reads tokens from a memmap file. """
+    """Reads tokens from a memmap file."""
     def __init__(self, memmap_name:str, num_tokens: int = 4096):
         self.memmap = np.memmap(
             DATA_PATH / (memmap_name if memmap_name.endswith(".dat") else memmap_name + ".dat"),
@@ -41,15 +38,14 @@ if __name__ == "__main__":
     parser.add_argument("memmap_name", type=str)
     args = parser.parse_args()
 
-    tokenizer = BPETokenizer.load(args.tokenizer_name)
+    tokenizer = load_tokenizer(args.tokenizer_name)
 
     print("Reading and tokenizing data...")
-    with open(DATA_PATH / (args.file_name if args.file_name.endswith(".txt") else args.file_name + ".txt"), "r", encoding="iso-8859-1") as file: # does this need to be iso-8859-1?
+    with open(DATA_PATH / (args.file_name if args.file_name.endswith(".txt") else args.file_name + ".txt"), "r", encoding="utf-8") as file:  # Changed encoding to utf-8
         text = file.read()
         
-    tokens = tokenizer.tokenize(text)
+    tokens = tokenizer.encode(text).ids
 
-    # Create memmap for the entire dataset
     print("Creating memmap...")
     memmap = np.memmap(DATA_PATH / (args.memmap_name + ".dat"), mode="w+", dtype='uint16', shape=(len(tokens),))
     memmap[:] = tokens
