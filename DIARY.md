@@ -66,7 +66,7 @@ Project Manager: Bjarni
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8**
 1. Literature Review on Transformer Models and N-gram Statistics
 I conducted an in-depth literature review on transformer models, with a particular emphasis on their relationship with n-gram statistics. This involved analyzing recent research papers, articles, and case studies to understand how n-gram approaches are integrated within transformer architectures. The objective was to identify methodologies that could enhance our project's performance by incorporating these statistical techniques.
 2. Attempting to Run an N-gram Statistics GitHub Library on MacBook
@@ -74,7 +74,7 @@ I attempted to implement an open-source GitHub library designed for n-gram stati
 3. Studying Previous Work on Tokenizers by **Bjarni** and **Jonas**
 I invested time in understanding the previous work done by Bjarni and Jonas on tokenizers. This involved reviewing their codebases, documentation, and any supplementary materials they provided in order to further enhance my knowledge regarding AI models and close potential knowledge gaps.
 
-### Brainstorming for Peer Group Meeting
+### Peer Group Meeting
 1. Clarifying Our Understanding of Transformers Using This Method
 We discussed what exactly we aim to understand about transformer models through our current method. It was noted that our approach might be describing the language dataset more than providing insights into the transformer architecture itself. We need to ensure that our methodology effectively analyzes the inner workings of transformers, not just the characteristics of the dataset.
 2. Reproducing Paper Findings Before Setting Divergent Goals
@@ -82,107 +82,9 @@ We agreed to reproduce the results of the referenced paper before establishing n
 Understanding "Model Variance" in Nguyen's Paper
 3. We discussed the meaning of "Model Variance" as presented in Nguyen's paper. We concluded that this term refers to the stochasticity and variability that occur when the same model is trained multiple times. This variance demonstrates that the findings are significant and consistently observable across different training runs, rather than being artifacts of a single instance.
 
-### Peer Group Meeting Results
-
-**1. Progress Alignment with the Other Group**
-
-- **Current Status:**
-  - Both our group and the other team are at a similar stage in the project.
-  - This parity offers an opportunity for collaboration and mutual support.
-
-**2. Project Structure Review**
-
-- **Discussion:**
-  - We reviewed and discussed our finalized project structure.
-  - Ensured that the methodology aligns with our research objectives and timelines.
-
-**3. Understanding N-gram Statistics in Transformer Models**
-
-- **Objective:**
-  - To figure out how n-gram statistics can be effectively applied within the context of transformer-based models.
-- **Challenges:**
-  - Integrating n-gram analysis with transformers is complex due to the models' architecture.
-
-**4. Implementation Challenges with N-gram Methods**
-
-- **Other Group's Experience:**
-  - Implemented an n-gram method but faced significant memory bottlenecks.
-- **Consensus:**
-  - Both teams agreed that developing a custom n-gram implementation may not be efficient.
-  - Decided to explore existing tools to save time and resources.
-
-**5. N-gram Definition and Marginalization**
-
-- **Other Group's Approach:**
-  - Using marginalization where the operation "−" reduces an n-gram to an (n−1)-gram.
-- **Discussion:**
-  - We explored this definition and its potential applicability to our project.
-  - Considered the mathematical implications and how it affects data representation.
-
-**6. Model Variance Discussion**
-
-- **Our Perspective:**
-  - Model variance refers to the variability that occurs when training multiple models.
-  - Emphasized the importance of training multiple models to achieve statistically significant results, as per Nguyen's work.
-- **Other Group's Perspective:**
-  - Focused on overfitting criteria as an indicator of model variance.
-- **Agreement:**
-  - Both groups concluded that training multiple models is necessary, despite the computational intensity.
-
-**7. Computational Intensity and Feasibility**
-
-- **Concern:**
-  - Training multiple models is computationally demanding.
-- **Action Item:**
-  - Discuss with our supervisor the necessity and feasibility of this approach.
-  - Explore potential solutions, such as using more efficient algorithms or accessing additional computational resources.
-
-**8. Use of Existing Libraries**
-
-- **Other Group's Tool:**
-  - Utilizing "tokengrams," a library available on GitHub ([Link](https://github.com/EleutherAI/tokengrams)).
-- **Our Consideration:**
-  - Evaluating whether adopting this library could mitigate the challenges we've faced.
-  - Acknowledged that custom implementation may not be the best use of time.
-
-**9. Secondary Dataset Selection**
-
-- **Other Group's Status:**
-  - Considering the open-source Wikipedia dataset but haven't made a final decision.
-- **Our Plan:**
-  - Intend to choose a different secondary dataset to allow for comparative analysis.
-  - Potential datasets include [List Possible Datasets].
-
-**10. Transformer Models and Tokenization**
-
-- **Other Group's Approach:**
-  - Using the GPT-2 transformer model from Hugging Face.
-- **Our Challenges:**
-  - Faced issues with GPT-2 due to its large vocabulary size, leading to increased complexity.
-- **Our Solution:**
-  - Developed a custom tokenizer to reduce the model size and complexity.
-  - Aiming to make the model more manageable with our available computational resources.
-
-**11. Need for Model Variance Analysis**
-
-- **Question:**
-  - Do we need to analyze model variance to substantiate our findings and ensure statistical relevance?
-- **Decision:**
-  - Agreed to consult with our supervisor to determine the importance of this analysis in our project scope.
-
-**Action Items:**
-
-1. **Consult Supervisor:**
-   - Schedule a meeting to discuss the necessity of training multiple models and analyzing model variance.
-2. **Evaluate "tokengrams" Library:**
-   - Assess the feasibility of integrating the "tokengrams" library into our project.
-3. **Dataset Selection:**
-   - Research and select a secondary dataset different from the other group's choice.
-4. **Optimize Tokenization:**
-   - Continue refining our tokenizer to improve model efficiency.
      
 ### Supervisor Meeting
-- 
+N/A
 
 ---
 
@@ -201,11 +103,100 @@ Project Manager: Boti
 ### Felix
 - **Number of hours this week: TBD**
 
+- **Transformer Research:** Studied key papers on transformer architectures using Web of Science to enhance our theoretical foundation, focusing on n-gram statistics.
+
+- **Practical Insights:** Watched the lecture "**Let's Build ChatGPT from Scratch**" to gain applicable insights into transformer implementation.
+
+- **Documentation and Coordination:** Organized reports, documented progress, and coordinated group activities to improve collaboration.
+
 ### Peer Group Meeting
-- 
+**1. Progress Alignment with the Other Group**
+- **Current Status:**
+  - Both our group and the other team are at a similar stage in the project.
+  - This parity offers an opportunity for collaboration and mutual support.
+
+**2. Project Structure Review**
+- **Discussion:**
+  - We reviewed and discussed our finalized project structure.
+  - Ensured that the methodology aligns with our research objectives and timelines.
+
+**3. Understanding N-gram Statistics in Transformer Models**
+- **Objective:**
+  - To figure out how n-gram statistics can be effectively applied within the context of transformer-based models.
+- **Challenges:**
+  - Integrating n-gram analysis with transformers is complex due to the models' architecture.
+
+**4. Implementation Challenges with N-gram Methods**
+- **Other Group's Experience:**
+  - Implemented an n-gram method but faced significant memory bottlenecks.
+- **Consensus:**
+  - Both teams agreed that developing a custom n-gram implementation may not be efficient.
+  - Decided to explore existing tools to save time and resources.
+
+**5. N-gram Definition and Marginalization**
+- **Other Group's Approach:**
+  - Using marginalization where the operation "−" reduces an n-gram to an (n−1)-gram.
+- **Discussion:**
+  - We explored this definition and its potential applicability to our project.
+  - Considered the mathematical implications and how it affects data representation.
+
+**6. Model Variance Discussion**
+- **Our Perspective:**
+  - Model variance refers to the variability that occurs when training multiple models.
+  - Emphasized the importance of training multiple models to achieve statistically significant results, as per Nguyen's work.
+- **Other Group's Perspective:**
+  - Focused on overfitting criteria as an indicator of model variance.
+- **Agreement:**
+  - Both groups concluded that training multiple models is necessary, despite the computational intensity.
+
+**7. Computational Intensity and Feasibility**
+- **Concern:**
+  - Training multiple models is computationally demanding.
+- **Action Item:**
+  - Discuss with our supervisor the necessity and feasibility of this approach.
+  - Explore potential solutions, such as using more efficient algorithms or accessing additional computational resources.
+
+**8. Use of Existing Libraries**
+- **Other Group's Tool:**
+  - Utilizing "tokengrams," a library available on GitHub ([Link](https://github.com/EleutherAI/tokengrams)).
+- **Our Consideration:**
+  - Evaluating whether adopting this library could mitigate the challenges we've faced.
+  - Acknowledged that custom implementation may not be the best use of time.
+
+**9. Secondary Dataset Selection**
+- **Other Group's Status:**
+  - Considering the open-source Wikipedia dataset but haven't made a final decision.
+- **Our Plan:**
+  - Intend to choose a different secondary dataset to allow for comparative analysis.
+  - Potential datasets include [List Possible Datasets].
+
+**10. Transformer Models and Tokenization**
+- **Other Group's Approach:**
+  - Using the GPT-2 transformer model from Hugging Face.
+- **Our Challenges:**
+  - Faced issues with GPT-2 due to its large vocabulary size, leading to increased complexity.
+- **Our Solution:**
+  - Developed a custom tokenizer to reduce the model size and complexity.
+  - Aiming to make the model more manageable with our available computational resources.
+
+**11. Need for Model Variance Analysis**
+- **Question:**
+  - Do we need to analyze model variance to substantiate our findings and ensure statistical relevance?
+- **Decision:**
+  - Agreed to consult with our supervisor to determine the importance of this analysis in our project scope.
+
+**Action Items:**
+1. **Consult Supervisor:**
+   - Schedule a meeting to discuss the necessity of training multiple models and analyzing model variance.
+2. **Evaluate "tokengrams" Library:**
+   - Assess the feasibility of integrating the "tokengrams" library into our project.
+3. **Dataset Selection:**
+   - Research and select a secondary dataset different from the other group's choice.
+4. **Optimize Tokenization:**
+   - Continue refining our tokenizer to improve model efficiency.
 
 ### Supervisor Meeting
-- 
+Scheduled on Thursday 4pm
 
 ---
 
