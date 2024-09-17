@@ -95,7 +95,7 @@ class NGramTrie:
             
             search([1,2,3], None) is equivalent to search([1,2,3], "+++"), i.e. search for this exact ngram
         """
-        def _search(self, search_context:str, node:TrieNode=None, index:int=0)->int:
+        def _search(search_context:str, node:TrieNode=None, index:int=0)->int:
             node = node or self.root  # start at root unless specified
 
             if index == len(search_context): return node.count  # Reached the end of the rule context
@@ -103,9 +103,9 @@ class NGramTrie:
             total_count = 0
             
             if (token:= search_context[index]) == '*':  # explore all child nodes at this position
-                total_count += sum(self._search(search_context, child_node, index + 1) for child_node in node.children.values())
+                total_count += sum(_search(search_context, child_node, index + 1) for child_node in node.children.values())
             elif token in node.children:  # continue search
-                total_count += self._search(search_context, node.children[token], index + 1)
+                total_count += _search(search_context, node.children[token], index + 1)
             else:  # not found
                 return 0
 
