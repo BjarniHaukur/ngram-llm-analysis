@@ -180,9 +180,7 @@ Understanding "Model Variance" in Nguyen's Paper
    - Research and select a secondary dataset different from the other group's choice.
 4. **Optimize Tokenization:**
    - Continue refining our tokenizer to improve model efficiency.
-5. **Weekly Meetings:**
-   - Maintain regular meetings to monitor progress and collaborate effectively.
-
+     
 ### Supervisor Meeting
 - 
 
