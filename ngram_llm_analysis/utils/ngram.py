@@ -56,6 +56,7 @@ class NGramTrie:
         return trie
     
     def insert(self, ngram):
+        assert len(ngram) == self.ngram_max_length, "N-gram length must be equal to the maximum length"
         node = self.root
         for token in ngram:
             node.children[token] = node.children.get(token, TrieNode()) # get or create the node
