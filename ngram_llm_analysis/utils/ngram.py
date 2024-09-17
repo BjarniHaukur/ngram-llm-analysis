@@ -26,15 +26,15 @@ class TrieNode:
 
 class NGramTrie:
     """ A trie for storing N-grams of tokenized text. """
-    def __init__(self, vocab_size:int):
+    def __init__(self, ngram_max_length:int):
         self.root = TrieNode()
-        # self.vocab_size = vocab_size  # necessary for the correctness of the Kneser-Ney smoothing algorithm
+        self.ngram_max_length = ngram_max_length  # not used
     
     def save(self, filename:str):
         filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump({
-                'vocab_size': self.vocab_size,
+                'ngram_max_length': self.ngram_max_length,
                 'root': self.root.to_dict()
             }, f, indent=2)
     
@@ -43,15 +43,15 @@ class NGramTrie:
         filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
         with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        trie = cls(data['vocab_size'])
+        trie = cls(data['ngram_max_length'])
         trie.root = TrieNode.from_dict(data['root'])
         return trie
     
     @classmethod
-    def fit(cls, tokens:list[int], ngram_length:int, vocab_size:int):
-        trie = cls(vocab_size)
-        for i in range(len(tokens) - ngram_length + 1):
-            ngram = tokens[i:i+ngram_length]
+    def fit(cls, tokens:list[int], ngram_max_length:int):
+        trie = cls(ngram_max_length)
+        for i in range(len(tokens) - ngram_max_length + 1):
+            ngram = tokens[i:i+ngram_max_length]
             trie.insert(ngram)
         return trie
     
@@ -153,16 +153,7 @@ class NGramTrie:
         return count
     
     def kneser_ney_smoothed_ratios(self, tokens:list[int], rule_context:str|None=None, discount:float=0.75)->list[float]:
-        """
-        Compute Kneser-Ney smoothed probability ratios for the given tokens and rule context.
-
-        Args:
-            tokens (list[int]): The sequence of tokens to compute ratios for.
-            rule_context (str): The rule context string, same as in the search method.
-
-        Returns:
-            list[float]: A list of smoothed probability ratios for each token in the sequence.
-        """
+        """Compute Kneser-Ney smoothed probability ratios for the given tokens and rule context."""
         ratios = []
         total_continuation = self.total_unique_contexts(len(tokens))
 
@@ -190,7 +181,7 @@ class NGramTrie:
         
             
 if __name__ == "__main__":
-    trie = NGramTrie(vocab_size=10)
+    trie = NGramTrie(ngram_max_length=3)
     trie.insert([1, 2, 3])
     trie.insert([1, 2, 3])
     trie.insert([1, 2, 4])
@@ -220,7 +211,7 @@ if __name__ == "__main__":
     assert count == 1, f"Test failed: Incorrect count for context '--+', expected 2 got {count}"
 
     # Test edge cases
-    empty_trie = NGramTrie(vocab_size=10)
+    empty_trie = NGramTrie(ngram_max_length=3)
     count = empty_trie.search([1, 2, 3], "+++")
     assert count == 0, f"Test failed: Empty trie should return 0, got {count}"
     count = trie.search([9, 9, 9], "+++")
