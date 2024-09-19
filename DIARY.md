@@ -49,7 +49,7 @@ Project Manager: Bjarni
 Project Manager: Bjarni
 
 ### Bjarni
-- **Number of hours this week: TBD**
+- **Number of hours this week: 10**
 - Repurpose code from a similar project I had
     - BPETokenizer, MemmapDataset, project structure, sampling functions (sampling with temp, top_k sampling, nucleous sampling)
 - Creating a small, workable, split of the TinyStories dataset
@@ -57,6 +57,7 @@ Project Manager: Bjarni
     - Kind off similar to N-Gram
     - Reveals some "worrying" patterns in the data
     - "Once upon of time, there was a " is more common than "tree"
+- Rewrote some code to support HuggingFace transformers and tokenizers and got training to run with logging to Weights and Biases
 
 
 ### Boti
@@ -93,6 +94,14 @@ Project Manager: Boti
 
 ### Bjarni
 - **Number of hours this week: TBD**
+- Looked at some open source repositories for N-Gram statistics
+- Most seem insufficient for our needs, needing to be modified to support the different rulesets we want
+- Before doing that I wanted to understand N-Grams better
+    - Implemented an N-Gram trie in pure python to better understand everything.
+    - Everything done in memory, no memmap etc.
+    - Kneser-Ney smoothing implemented to better represent rare/unseen ngrams
+    - Will probably not work for large datasets as is atleast
+    - One idea I had is to "shard/chunk" the trie and only load parts of it into memory at a time when needded.
 
 ### Boti
 - **Number of hours this week: TBD**
