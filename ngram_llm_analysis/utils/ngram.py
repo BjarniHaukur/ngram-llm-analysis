@@ -152,7 +152,7 @@ class NGramTrie:
         
         return count
     
-    def kneser_ney_smoothed_ratios(self, tokens:list[int], rule_context:str|None=None, discount:float=0.75)->list[float]:
+    def kneser_ney_smoothed_ratios(self, tokens:list[int], rule_context:str, discount:float=0.75)->list[float]:
         """Compute Kneser-Ney smoothed probability ratios for the given tokens and rule context."""
         ratios = []
         total_continuation = self.total_unique_contexts(len(tokens))
@@ -178,6 +178,13 @@ class NGramTrie:
                 ratios.append(backoff_prob)
 
         return ratios
+    
+    def predict_next_token(self, context:list[int], rule_context:str|None=None)->int:
+        """Predict the next token in the sequence using Kneser-Ney smoothed probabilities."""
+        rule_context = rule_context or "+" * len(context)
+        ratios = self.kneser_ney_smoothed_ratios(context, rule_context)
+        max_ratio = max(ratios)
+        return ratios.index(max_ratio)
         
             
 if __name__ == "__main__":
@@ -231,7 +238,7 @@ if __name__ == "__main__":
 
     # Test kneser_ney_smoothed_ratios
     tokens = [1, 2, 3]
-    rule_context = "+++"
+
     kn_ratios = trie.kneser_ney_smoothed_ratios(tokens, rule_context, discount=0.75)
 
     # Expected Kneser-Ney probability for the last token
