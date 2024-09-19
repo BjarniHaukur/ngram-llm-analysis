@@ -206,3 +206,27 @@ Project Manager: Bjarni
 - We had a one-hour meeting to discuss our approaches and explore potential improvements to the project. We also reviewed the timeline for completing our tasks.
 - Johan explained his choice of the N-Gram topic, highlighting its relevance to the explainability of transformers. He provided an example from the Swedish language, demonstrating how a single syllable can change the entire context.
 - He also mentioned the possibility of acquiring resources from KTH to support our project.
+
+
+---
+
+## Week X ( - )
+Project Manager: NAME
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+
+### Peer Group Meeting
+
+### Supervisor Meeting
+
+---
