@@ -81,7 +81,7 @@ class NGramTrie:
         return recursive_search(self.root, search_context, 0)
     
     def _preprocess_rule_context(self, tokens:list[int], rule_context:str|None)->str:
-        if rule_context is None: return "+" * len(tokens)
+        if rule_context is None: return tokens
         assert len(tokens) == len(rule_context), "Tokens and rule context must be of the same length"
         return ["*" if rule == "*" else token for token, rule in zip(tokens, rule_context) if rule != "-"]
     
