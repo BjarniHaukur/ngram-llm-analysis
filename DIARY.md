@@ -1,5 +1,66 @@
 # Team Diary
 
+---
+
+## Week 39 (September 23 - September 29)
+Project Manager: NAME
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+- Explored Google Cloud resources, focusing on NVIDIA A100 GPU and cost-saving strategies, including the free trial and $50 team coupons.
+- Reviewed the ngram model and database solution, ensuring alignment with project goals and fit with Google Cloud
+- Prepared project reports and documentation, summarizing key findings and strategies for the team’s next steps.
+
+### Peer Group Meeting
+
+#### 1. **Ngram Implementation: Competitive Status**
+   - The competing group has discontinued their efforts to implement the ngram independently.
+   - We conducted a detailed review of open-source ngram repositories on GitHub. None of them are compatible with marginalization because wildcards are not lexicographically ordered. As a result, they fail to meet our specific needs.
+
+#### 2. **Workaround: Database Implementation**
+   - To overcome the limitations of the available tools, our team has chosen to implement a database-based solution.
+   - **Database Configuration**:
+     - The database will store n-grams using a key attribute (token 1, token 2, ..., token n).
+     - This structure allows for fast search queries but results in slower insertion speeds.
+
+#### 3. **N-gram Size Debate**
+   - A key point of discussion was whether to use 7-gram or 8-gram statistics for our model.
+   - The competing group has already implemented 8-grams, storing 7 tokens.
+   - We are still investigating the advantages and drawbacks of both options, with further research required before making a final decision.
+
+#### 4. **Compute Resources: Strategic Cloud Usage**
+   - The competing group is utilizing Johan’s cluster, but our team only has access to a partition of the KTH cluster.
+   - Google Cloud, while offering better hardware, is costly, which poses a challenge for sustained use.
+
+   **Team Resource Plan**:
+   - Our team consists of four members, each with a $50 Google Cloud coupon.
+   - We plan to use the NVIDIA A100 (80GB) GPU, which costs approximately $5 per hour. This gives us 40 hours of total compute time.
+   - To maximize our efficiency, we are considering setting up a free trial Google Cloud instance with at least 100GB of RAM to store all n-grams in memory. This instance will be linked to the GPU cluster, which will either run on another Google Cloud instance or on the KTH cluster.
+
+#### 5. **Innovative Approaches and Competitive Edge**
+   - The competing group is focusing on early stopping. However, we have decided to avoid this approach and concentrate on broader dataset comparisons and model depth.
+   - Given our limited compute resources, we aim to push the boundaries of n-gram models.
+   
+   **New Exploration: Infinite Grams**:
+   - Inspired by recent research, we are exploring infinite grams to see if this method can improve our model's performance.
+   - Although infinite grams do not support marginalization, we will evaluate if the potential benefits outweigh this limitation.
+
+#### 6. **Next Steps**
+   - Continue internal discussions on the 7-gram vs. 8-gram approach and finalize our decision.
+   - Further investigate research papers on infinite grams to assess whether they can offer a competitive advantage.
+
+### Supervisor Meeting
+   - Scheduled for Thursday 3pm
+---
 
 ## Week 38 (September 16 - September 22)
 Project Manager: Boti
@@ -22,12 +83,9 @@ Project Manager: Boti
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: TBD**
-
+- **Number of hours this week: 6**
 - **Transformer Research:** Studied key papers on transformer architectures using Web of Science to enhance our theoretical foundation, focusing on n-gram statistics.
-
 - **Practical Insights:** Watched the lecture "**Let's Build ChatGPT from Scratch**" to gain applicable insights into transformer implementation.
-
 - **Documentation and Coordination:** Organized reports, documented progress, and coordinated group activities to improve collaboration.
 
 ### Peer Group Meeting
@@ -117,7 +175,10 @@ Project Manager: Boti
    - Continue refining our tokenizer to improve model efficiency.
 
 ### Supervisor Meeting
-Scheduled on Thursday 4pm
+ - We discussed potential ways to simplify our model and incorporate approximations to reduce the computational load, ensuring that the ngram implementation remains efficient despite resource constraints.
+    - It was decided that our group will hold regular meetings with the supervisor every **Thursday at 3 PM** to track progress, address challenges, and adjust strategies as needed.
+    - We examined the recent release of GPT-01 and discussed its implications for natural language processing. The potential impact on ngram model development and comparisons to current architectures were considered.
+    - Given the scarcity of computational resources, we agreed to reduce the complexity of the model. Instead of focusing on training a high-parameter model, we will prioritize a more manageable approach, which will better fit within our compute limits.
 
 ---
 
