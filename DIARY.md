@@ -77,7 +77,10 @@ Project Manager: Boti
     - One idea I had is to "shard/chunk" the trie and only load parts of it into memory at a time when needded.
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 6**
+1. Trying out the KTH cluster
+2. Reading and understanding other solutions for n-grams, brainstorming for new solutions
+3. Writing code and testing the size of the n-gram trie in memory and on disk
 
 ### Jonas
 - **Number of hours this week: TBD**
@@ -198,7 +201,9 @@ Project Manager: Bjarni
 
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 4**
+1. Keeping up with the state and changes of the project
+2. Reading the code
 
 ### Jonas
 - **Number of hours this week: TBD**
