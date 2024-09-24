@@ -32,3 +32,23 @@ Let VSCode install the requirements for running the notebooks.
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
+
+## Download data
+- TODO
+
+## RUN
+cd into ngram_llm_analysis/
+
+### Examples
+Training
+
+`python3 train.py --config llama_small --dataset small_train`
+
+Building a specific tokenizer
+
+`python3 utils/tokenizer.py <dataset> --name <tokenizer_name>`
+
+Using the specialized tokenizer
+`python3 train.py --config llama_small --dataset small_train --tokenizer <tokenizer_name>`
+
+

@@ -45,6 +45,8 @@ def model_from_config(config_name:str, vocab_size:int):
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
 
+
+
 def main(args):
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Training on device: {DEVICE}")
@@ -59,12 +61,12 @@ def main(args):
         tokenizer = build_tokenizer(data_name=args.dataset, name=tokenizer_name)
     tokenizer.pad_token = tokenizer.token_to_id("<pad>")
     
-    # ensure memmap exists
-    if not MemmapDataset.exists(memmap_name=args.dataset):
+    # ensure memmap exists corresponding to the tokenizer
+    if not MemmapDataset.exists(memmap_name=args.dataset, tokenizer_name=tokenizer_name):
         print(f"Memmap file '{args.dataset}' not found. Building memmap...")
         MemmapDataset.build_memmap(args.dataset, tokenizer_name, args.dataset)
     
-    full_ds = MemmapDataset(args.dataset, args.seq_len)
+    full_ds = MemmapDataset(args.dataset, tokenizer_name, args.seq_len)
     
     train_size = int(0.8 * len(full_ds))
     val_size = int(0.1 * len(full_ds))

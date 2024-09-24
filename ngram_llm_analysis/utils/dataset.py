@@ -8,13 +8,16 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
+from datetime import datetime
+
 DATA_PATH = Path("../data/")
+
 
 class MemmapDataset(Dataset):
     """Reads tokens from a memmap file."""
-    def __init__(self, memmap_name:str, num_tokens: int = 4096):
+    def __init__(self, memmap_name:str, tokenizer_name:str, num_tokens:int = 4096):
         self.memmap = np.memmap(
-            DATA_PATH / (memmap_name if memmap_name.endswith(".dat") else memmap_name + ".dat"),
+            DATA_PATH / "memmaps" / memmap_name.removesuffix(".dat") / (tokenizer_name + ".dat"),
             dtype="uint16", mode="r"
         )
         self.num_tokens = num_tokens
@@ -27,21 +30,26 @@ class MemmapDataset(Dataset):
 
     def __len__(self):
         return len(self.memmap) // self.num_tokens
+    
 
     def build_memmap(dataset_file:str, tokenizer_name:str, memmap_name:str, verbose:bool = False):
         tokenizer = load_tokenizer(tokenizer_name)
         with open(DATA_PATH / (dataset_file if dataset_file.endswith(".txt") else dataset_file + ".txt"), "r", encoding="utf-8") as file:
             text = file.read()
         tokens = tokenizer.encode(text).ids
-        memmap = np.memmap(DATA_PATH / (memmap_name + ".dat"), mode="w+", dtype='uint16', shape=(len(tokens),))
+        
+        memmap_dir = DATA_PATH / "memmaps" / memmap_name.removesuffix(".dat")
+        memmap_dir.mkdir(parents=True, exist_ok=True)
+        
+        memmap = np.memmap((memmap_dir / (tokenizer_name + ".dat")), mode="w+", dtype='uint16', shape=(len(tokens),))
         memmap[:] = tokens
         memmap.flush()
         if verbose:
             print(f"Memmap created with {len(tokens)} tokens.")
     
-    def exists(memmap_name:str) -> bool:
-        return Path(DATA_PATH / (memmap_name if memmap_name.endswith(".dat") else memmap_name + ".dat")).exists()
-
+    def exists(memmap_name:str, tokenizer_name:str) -> bool:
+        path = DATA_PATH / "memmaps" / memmap_name.removesuffix(".dat") / (tokenizer_name + ".dat")
+        return Path(path).exists()
 
 if __name__ == "__main__":
     from argparse import ArgumentParser

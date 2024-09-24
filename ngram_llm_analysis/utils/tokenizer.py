@@ -113,11 +113,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Fit a Byte-Pair Encoding tokenizer")
     parser.add_argument("data_name", type=str)
-    parser.add_argument("--tokenizer_name", type=str, default="tokenizer")
+    parser.add_argument("--name", type=str, default="tokenizer")
     parser.add_argument("--proportion", type=float, default=0.5)
     parser.add_argument("--vocab_size", type=int, default=8096)
     args = parser.parse_args()
 
-    build_tokenizer(args.data_name, args.vocab_size, args.proportion, args.tokenizer_name)
+    build_tokenizer(args.data_name, args.name, args.vocab_size, args.proportion)
 
 
