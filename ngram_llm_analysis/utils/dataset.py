@@ -28,6 +28,20 @@ class MemmapDataset(Dataset):
     def __len__(self):
         return len(self.memmap) // self.num_tokens
 
+    def build_memmap(dataset_file:str, tokenizer_name:str, memmap_name:str, verbose:bool = False):
+        tokenizer = load_tokenizer(tokenizer_name)
+        with open(DATA_PATH / (dataset_file if dataset_file.endswith(".txt") else dataset_file + ".txt"), "r", encoding="utf-8") as file:
+            text = file.read()
+        tokens = tokenizer.encode(text).ids
+        memmap = np.memmap(DATA_PATH / (memmap_name + ".dat"), mode="w+", dtype='uint16', shape=(len(tokens),))
+        memmap[:] = tokens
+        memmap.flush()
+        if verbose:
+            print(f"Memmap created with {len(tokens)} tokens.")
+    
+    def exists(memmap_name:str) -> bool:
+        return Path(DATA_PATH / (memmap_name if memmap_name.endswith(".dat") else memmap_name + ".dat")).exists()
+
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
@@ -37,18 +51,6 @@ if __name__ == "__main__":
     parser.add_argument("tokenizer_name", type=str)
     parser.add_argument("memmap_name", type=str)
     args = parser.parse_args()
+    
+    MemmapDataset.build_memmap(args.file_name, args.tokenizer_name, args.memmap_name, verbose=True)
 
-    tokenizer = load_tokenizer(args.tokenizer_name)
-
-    print("Reading and tokenizing data...")
-    with open(DATA_PATH / (args.file_name if args.file_name.endswith(".txt") else args.file_name + ".txt"), "r", encoding="utf-8") as file:  # Changed encoding to utf-8
-        text = file.read()
-        
-    tokens = tokenizer.encode(text).ids
-
-    print("Creating memmap...")
-    memmap = np.memmap(DATA_PATH / (args.memmap_name + ".dat"), mode="w+", dtype='uint16', shape=(len(tokens),))
-    memmap[:] = tokens
-    memmap.flush()
-
-    print(f"Memmap created with {len(tokens)} tokens.")

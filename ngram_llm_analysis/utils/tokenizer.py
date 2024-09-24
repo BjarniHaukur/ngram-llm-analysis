@@ -30,14 +30,21 @@ def fit_tokenizer(text:str, vocab_size:int) -> Tokenizer:
     tokenizer.train_from_iterator([text], trainer=trainer)
     return tokenizer
 
+def path(filename:str) -> Path:
+    return CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
+
 def save_tokenizer(tokenizer:Tokenizer, filename:str):
     CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
-    filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
+    filepath = path(filename)
     tokenizer.save(str(filepath))
 
 def load_tokenizer(filename:str) -> Tokenizer:
-    filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
+    filepath = path(filename)
+    
+    if not filepath.exists():
+        raise FileNotFoundError(f"Tokenizer file {filepath} not found. Please build the tokenizer first.")
     return Tokenizer.from_file(str(filepath))
+ 
 
 RESET_BG = '\x1b[0m'
 COLORS = [
@@ -79,6 +86,25 @@ def color_text_html(tokenizer:Tokenizer, text:str) -> str:
             colored += token
     return colored
 
+def build_tokenizer(data_name:str, name:str = "tokenizer", vocab_size:int = 8096, proportion:float = 0.5):
+    """
+    Builds a tokenizer from a 'data_name' file in the data folder.
+    The tokenizer is saved to a file named 'name' in tokenizer checkpoints.
+    """
+    with open("../data/" + (data_name if data_name.endswith(".txt") else data_name + ".txt"), "r") as f:
+        f.readline()  # the first line is just "text"
+        data = f.read()
+    
+    data = data[:int(len(data) * proportion)]
+    
+    # make sure all characters are in the data
+    data += ''.join([chr(i) for i in range(32, 127)])
+
+    tokenizer = fit_tokenizer(data, vocab_size)
+    save_tokenizer(tokenizer, name)
+
+    return tokenizer
+
 if __name__ == "__main__":
     import random
     import argparse
@@ -92,14 +118,6 @@ if __name__ == "__main__":
     parser.add_argument("--vocab_size", type=int, default=8096)
     args = parser.parse_args()
 
-    with open("../data/" + (args.data_name if args.data_name.endswith(".txt") else args.data_name + ".txt"), "r") as f:
-        f.readline()  # the first line is just "text"
-        data = f.read()
-    
-    data = data[:int(len(data) * args.proportion)]
-    
-    # make sure all characters are in the data
-    data += ''.join([chr(i) for i in range(32, 127)])
+    build_tokenizer(args.data_name, args.vocab_size, args.proportion, args.tokenizer_name)
 
-    tokenizer = fit_tokenizer(data, args.vocab_size)
-    save_tokenizer(tokenizer, args.tokenizer_name)
+

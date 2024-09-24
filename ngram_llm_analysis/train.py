@@ -7,7 +7,7 @@ from torch.utils.data import ConcatDataset, random_split
 from transformers import Trainer, TrainingArguments, LlamaForCausalLM, LlamaConfig, GPT2LMHeadModel, GPT2Config
 
 from utils.dataset import MemmapDataset
-from utils.tokenizer import load_tokenizer
+from utils.tokenizer import build_tokenizer, load_tokenizer
 from utils.metrics import bleu_score
 
 torch.random.manual_seed(1337)
@@ -48,9 +48,21 @@ def model_from_config(config_name:str, vocab_size:int):
 def main(args):
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Training on device: {DEVICE}")
+    
+    tokenizer_name = args.tokenizer or "tokenizer"
 
-    tokenizer = load_tokenizer("tokenizer")
+    # ensure tokenizer exists
+    try:
+        tokenizer = load_tokenizer(tokenizer_name)
+    except FileNotFoundError:
+        print(f"Tokenizer file '{tokenizer_name}' not found. Building tokenizer...")
+        tokenizer = build_tokenizer(data_name=args.dataset, name=tokenizer_name)
     tokenizer.pad_token = tokenizer.token_to_id("<pad>")
+    
+    # ensure memmap exists
+    if not MemmapDataset.exists(memmap_name=args.dataset):
+        print(f"Memmap file '{args.dataset}' not found. Building memmap...")
+        MemmapDataset.build_memmap(args.dataset, tokenizer_name, args.dataset)
     
     full_ds = MemmapDataset(args.dataset, args.seq_len)
     
@@ -104,9 +116,10 @@ def main(args):
     trainer.save_model(str(model_path / "final_model"))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train language model for Python code generation")
-    parser.add_argument("--config", type=str, required=True, help="Name of the model configuration file")
-    parser.add_argument("--dataset", type=str, required=True, help="Name of the memmap file")
+    parser = argparse.ArgumentParser(description="Train transformer model")
+    parser.add_argument("--config", type=str, required=True, help="Name of the model configuration file. Type: .yaml")
+    parser.add_argument("--dataset", type=str, required=True, help="Name of dataset file. Type: .txt")
+    parser.add_argument("--tokenizer", type=str, required=False, help="Tokenizer, defaults to ___. Type: .json")
     parser.add_argument("--run_name", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--seq_len", type=int, default=2048)
