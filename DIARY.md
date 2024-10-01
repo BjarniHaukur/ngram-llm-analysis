@@ -2,8 +2,8 @@
 
 ---
 
-## Week 39 (September 23 - September 29)
-Project Manager: NAME
+## Week 40 (30.09.2024 - 06.10.2024)
+Project Manager: Jonas
 
 ### Bjarni
 - **Number of hours this week: TBD**
@@ -16,6 +16,59 @@ Project Manager: NAME
 
 ### Felix
 - **Number of hours this week: TBD**
+
+#### 1. **Google Cloud Architecture Preparation**:
+   - Set up and configure cloud infrastructure to support the n-gram model deployment.
+   - Coordinate resource usage within the team to stay within budget and timelines.
+### 2. **Literature Review**:
+   - Investigate alternative smoothing techniques mentioned in the reference paper.
+   - Identify any gaps or potential flaws in the paper’s methodology.
+   - Update references and ensure proper citation of key materials for future use.
+### 3. **Documentation**:
+   - Keep detailed records of project progress, including key decisions and challenges.
+   - Ensure documentation is ready for the upcoming 15-minute half-time evaluation presentation.
+   - Contribute to the presentation materials, focusing on n-gram statistics, implementation, and findings.
+
+### Peer Group Meeting
+
+#### Key Decisions and Findings:
+- We confirmed that our focus remains on 7-gram statistics.
+- Boti’s analysis revealed that RUST is three times more efficient for managing the n-gram tree.
+- We discussed the implementation's speed: compressed 3-gram data is around 500MB, with exponential growth expected for 7-grams.
+#### Comparison with the Opponent Group:
+- The opponent group sticks to using a database and doesn't store the tree in memory, unlike our approach.
+- Their SQL file is compressed to 2.3GB locally, while we chose uncompressed data in memory to avoid time overhead.
+#### Potential Optimizations and Challenges:
+- We explored the idea of making n-gram generation and training asynchronous in different processes and plan to test this.
+- Unfortunately, the person responsible for implementation wasn't present, so we couldn’t dive into the technical details.
+#### Paper Discussion:
+- Both groups remain unclear about the alternative smoothing methods mentioned in the paper.
+- We speculated whether the paper might have omitted details on certain potential flaws.
+#### Upcoming Tasks:
+- Next week, we have a half-time evaluation that requires a 15-minute Zoom presentation. While results aren't ready yet, we will focus on presenting our approach.
+- We will prepare the presentation for Thursday, and Felix will take the lead on it.
+#### Training Considerations:
+- The opponent group has encountered problems during training.
+- For us, the n-gram needs to be fully completed before starting training, as we plan to collect statistics during the training process.
+
+### Supervisor Meeting
+- N/A (Canceled due slow progression)
+---
+
+## Week 39 (September 23 - September 29)
+Project Manager: Felix
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: 10h**
 - Explored Google Cloud resources, focusing on NVIDIA A100 GPU and cost-saving strategies, including the free trial and $50 team coupons.
 - Reviewed the ngram model and database solution, ensuring alignment with project goals and fit with Google Cloud
 - Prepared project reports and documentation, summarizing key findings and strategies for the team’s next steps.
