@@ -24,7 +24,7 @@ Project Manager: Jonas
    - Investigate alternative smoothing techniques mentioned in the reference paper.
    - Identify any gaps or potential flaws in the paper’s methodology.
    - Update references and ensure proper citation of key materials for future use.
-### 3. **Documentation**:
+#### 3. **Documentation**:
    - Keep detailed records of project progress, including key decisions and challenges.
    - Ensure documentation is ready for the upcoming 15-minute half-time evaluation presentation.
    - Contribute to the presentation materials, focusing on n-gram statistics, implementation, and findings.
