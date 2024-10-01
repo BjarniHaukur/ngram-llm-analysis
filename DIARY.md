@@ -38,6 +38,7 @@ Project Manager: Jonas
 #### Comparison with the Opponent Group:
 - The opponent group sticks to using a database and doesn't store the tree in memory, unlike our approach.
 - Their SQL file is compressed to 2.3GB locally, while we chose uncompressed data in memory to avoid time overhead.
+- A single n-gram lookup takes around a second for them, compared to our μs range lookup time.
 #### Potential Optimizations and Challenges:
 - We explored the idea of making n-gram generation and training asynchronous in different processes and plan to test this.
 - Unfortunately, the person responsible for implementation wasn't present, so we couldn’t dive into the technical details.
@@ -59,12 +60,17 @@ Project Manager: Jonas
 Project Manager: Felix
 
 ### Bjarni
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8**
 - Realized that any opensource implementation that uses suffix arrays is not compatible with marginalization
   - Realized this while making a barebones implementation using suffix arrays and binary search
   - Suffix arrays are lexicographically ordered and rely on binary search 
   - This does not work when searching with wildcards since they aren't lexicographically ordered (can be done with exhaustive search)
-- 
+- Instead, I started implementing a suffix tree (trie) from scratch in Rust
+  - Basically converting the python code from our previous implementation to Rust
+- We discussed how we could avoid the problem of storing the entire ngram in memory
+  - Realized that we were thinking in problems, not solutions
+  - Sure, 7-grams for the entire TinyStories dataset may be 100GB+ in memory but we can easily rent a machine with 128GB of RAM for a few GC credits
+  - Then we can do async API calls from our GPU cluster to this NGram server, ensuring we dont bottleneck training or halt while waiting for NGram lookups
 
 ### Boti
 - **Number of hours this week: TBD**
