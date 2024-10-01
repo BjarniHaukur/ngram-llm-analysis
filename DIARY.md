@@ -60,6 +60,11 @@ Project Manager: Felix
 
 ### Bjarni
 - **Number of hours this week: TBD**
+- Realized that any opensource implementation that uses suffix arrays is not compatible with marginalization
+  - Realized this while making a barebones implementation using suffix arrays and binary search
+  - Suffix arrays are lexicographically ordered and rely on binary search 
+  - This does not work when searching with wildcards since they aren't lexicographically ordered (can be done with exhaustive search)
+- 
 
 ### Boti
 - **Number of hours this week: TBD**
@@ -119,7 +124,7 @@ Project Manager: Felix
 Project Manager: Boti
 
 ### Bjarni
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8**
 - Looked at some open source repositories for N-Gram statistics
 - Most seem insufficient for our needs, needing to be modified to support the different rulesets we want
 - Before doing that I wanted to understand N-Grams better
