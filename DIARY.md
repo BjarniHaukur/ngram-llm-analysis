@@ -76,7 +76,9 @@ Project Manager: Felix
 - **Number of hours this week: TBD**
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 4**
+  - still sick.. Prescribed antibiotics from doctor
+  - Fixed training loop so that it is easier to run. Dependencies such as dataset, tokenizer had to be initialized with `dataset.py` and `tokenizer.py`. Now its simple to use described in [README](README.md). [Commit](https://github.com/BjarniHaukur/ngram-llm-analysis/commit/565726f8a64bfb1f143299bdfdbabf6181d16bc9)
 
 ### Felix
 - **Number of hours this week: 10h**
@@ -147,7 +149,9 @@ Project Manager: Boti
 3. Writing code and testing the size of the n-gram trie in memory and on disk
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 4**
+  - sick
+  - Ngrams visualization. Visualize the ngrams generated. Failed to visualize the rules
 
 ### Felix
 - **Number of hours this week: 6**
@@ -270,7 +274,10 @@ Project Manager: Bjarni
 2. Reading the code
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 4**
+  - Sick
+  - Checked out the N-grams repository [tongrams](https://github.com/JoRo-Code/tongrams)
+      - realized that it was quite outdated and had incompatibility issues with M1 chips.
 
 ### Felix
 - **Number of hours this week: 8**
