@@ -73,7 +73,11 @@ Project Manager: Felix
   - Then we can do async API calls from our GPU cluster to this NGram server, ensuring we dont bottleneck training or halt while waiting for NGram lookups
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 15**
+- Itarated the rust NGramTrie implementation
+- Researched best practices for efficient ngram storage
+- Researched multithreading solutions to trie insertions
+- Tried small example solutions and started testing them
 
 ### Jonas
 - **Number of hours this week: 4**
