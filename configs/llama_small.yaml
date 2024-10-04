@@ -1,6 +1,12 @@
+wandb_project: ngram-llm-analysis
+
+tokenizer_name: small_500
+
 model_type: llama
 hidden_size: 128
 num_hidden_layers: 4
 num_attention_heads: 4
 intermediate_size: 512
 max_position_embeddings: 2048
+
+vocab_size: 8196 # 65536 for u16 ngram trie
