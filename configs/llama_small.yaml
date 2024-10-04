@@ -1,6 +1,6 @@
 wandb_project: ngram-llm-analysis
 
-tokenizer_name: tokenizer  # should match vocab_size
+tokenizer_name: tokenizer_8192  # should match vocab_size
 vocab_size: 8192 # 65536 for u16 ngram trie
 
 model_type: llama

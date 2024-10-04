@@ -67,11 +67,11 @@ def main(args):
     tokenizer.pad_token = tokenizer.token_to_id("<pad>")
     
     # ensure memmap exists corresponding to the tokenizer
-    if not MemmapDataset.exists(memmap_name=args.dataset, tokenizer_name=tokenizer_name):
+    if not MemmapDataset.exists(dataset_file=args.dataset, tokenizer_name=tokenizer_name):
         print(f"Memmap file '{args.dataset}' not found. Building memmap...")
-        MemmapDataset.build_memmap(args.dataset, tokenizer_name, args.dataset)
+        MemmapDataset.build_memmap(args.dataset, tokenizer_name)
     
-    full_ds = MemmapDataset(args.dataset, tokenizer_name, seq_len)
+    full_ds = MemmapDataset(dataset_file=args.dataset, tokenizer_name=tokenizer_name, num_tokens=seq_len)
     
     train_size = int(0.8 * len(full_ds))
     val_size = int(0.1 * len(full_ds))
@@ -202,5 +202,10 @@ if __name__ == "__main__":
     parser.add_argument("--prefetch_factor", type=int, default=4)
     parser.add_argument("--continue_from", type=str, default=None, help="Path to checkpoint file to resume training from")
     args = parser.parse_args()
+
+    import time
+    start_time = time.time()
     main(args)
+    end_time = time.time()
+    print(f"Training completed in {end_time - start_time:.2f} seconds")
 
