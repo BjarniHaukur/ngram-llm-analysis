@@ -1,11 +1,11 @@
 wandb_project: ngram-llm-analysis
 
-tokenizer_name: tokenizer_8192  # should match vocab_size
-vocab_size: 8192 # 65536 for u16 ngram trie
+tokenizer_name: tokenizer_32768  # should match vocab_size
+vocab_size: 32768 # 65536 for u16 ngram trie
 
 model_type: llama
-hidden_size: 1024
+hidden_size: 768
 num_hidden_layers: 12
-num_attention_heads: 16
-intermediate_size: 4096
+num_attention_heads: 12
+intermediate_size: 3072
 max_position_embeddings: 2048

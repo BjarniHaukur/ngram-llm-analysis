@@ -15,7 +15,7 @@ EOS, EOS_ID = "<eos>", 1
 PAD, PAD_ID = "<pad>", 2
 UNK, UNK_ID = "<unk>", 3
 
-def fit_tokenizer(text:str, vocab_size:int) -> Tokenizer:
+def fit_tokenizer(text_iterator, vocab_size:int) -> Tokenizer:
     tokenizer = Tokenizer(BPE(unk_token=UNK))
     tokenizer.pre_tokenizer = ByteLevel()
     tokenizer.decoder = ByteLevelDecoder()
@@ -23,11 +23,11 @@ def fit_tokenizer(text:str, vocab_size:int) -> Tokenizer:
     trainer = BpeTrainer(
         special_tokens=[UNK, PAD, BOS, EOS],
         vocab_size=vocab_size,
-        min_frequency=2,
+        min_frequency=1,
         show_progress=True,
     )
 
-    tokenizer.train_from_iterator([text], trainer=trainer)
+    tokenizer.train_from_iterator(text_iterator, trainer=trainer)
     return tokenizer
 
 def path(filename:str) -> Path:
@@ -86,21 +86,34 @@ def color_text_html(tokenizer:Tokenizer, text:str) -> str:
             colored += token
     return colored
 
-def build_tokenizer(data_name:str, name:str = "tokenizer", vocab_size:int = 8096, proportion:float = 0.5):
+def build_tokenizer(data_name:str, name:str = "tokenizer", vocab_size:int = 8096, chunk_size:int = 1024**2):
     """
     Builds a tokenizer from a 'data_name' file in the data folder.
     The tokenizer is saved to a file named 'name' in tokenizer checkpoints.
     """
-    with open("../data/" + (data_name if data_name.endswith(".txt") else data_name + ".txt"), "r") as f:
-        f.readline()  # the first line is just "text"
-        data = f.read()
-    
-    data = data[:int(len(data) * proportion)]
-    
-    # make sure all characters are in the data
-    data += ''.join([chr(i) for i in range(32, 127)])
+    data_file = "../data/" + (data_name if data_name.endswith(".txt") else data_name + ".txt")
+    total_lines = 0
 
-    tokenizer = fit_tokenizer(data, vocab_size)
+    # First pass to count total lines
+    with open(data_file, "r") as f:
+        f.readline()  # Skip the first line
+        for _ in f:
+            total_lines += 1
+
+    num_lines_to_read = chunk_size
+
+    def data_iterator():
+        with open(data_file, "r") as f:
+            f.readline()  # Skip the first line
+            for i, line in enumerate(f):
+                if i >= num_lines_to_read:
+                    break
+                yield line.strip()
+
+        # Ensure all characters are included
+        yield ''.join([chr(i) for i in range(32, 127)])
+
+    tokenizer = fit_tokenizer(data_iterator(), vocab_size)
     save_tokenizer(tokenizer, name)
 
     return tokenizer
@@ -114,10 +127,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fit a Byte-Pair Encoding tokenizer")
     parser.add_argument("data_name", type=str)
     parser.add_argument("--name", type=str, default="tokenizer")
-    parser.add_argument("--proportion", type=float, default=0.5)
+    parser.add_argument("--chunk_size", type=int, default=1024**2, help="Number of lines to process at a time")
     parser.add_argument("--vocab_size", type=int, default=8192)
     args = parser.parse_args()
 
-    build_tokenizer(args.data_name, args.name, args.vocab_size, args.proportion)
+    build_tokenizer(args.data_name, args.name, args.vocab_size, args.chunk_size)
 
 

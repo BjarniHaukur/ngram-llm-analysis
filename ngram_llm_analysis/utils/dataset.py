@@ -44,7 +44,7 @@ class MemmapDataset(Dataset):
         with open(dataset_path, 'r', encoding='utf-8') as file:
             file.readline()  # Skip the first line
             batch_lines = []
-            pbar = tqdm(desc="Tokenizing and writing tokens...", unit=" lines")
+            pbar = tqdm(desc="Tokenizing and writing to tempfile...", unit=" lines")
             for line in file:
                 batch_lines.append(line)
                 if len(batch_lines) >= batch_size:
@@ -97,6 +97,7 @@ class MemmapDataset(Dataset):
         return Path(path).exists()
 
 if __name__ == "__main__":
+    import time
     from argparse import ArgumentParser
     
     parser = ArgumentParser(description="Creating a memmap from the TinyStories dataset and a given tokenizer")
@@ -105,5 +106,8 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=10000)
     args = parser.parse_args()
     
+    start = time.time()
     MemmapDataset.build_memmap(args.file_name, args.tokenizer_name, batch_size=args.batch_size)
+    end = time.time()
+    print(f"Time taken to build memmap: {end - start:.2f} seconds")
 

@@ -1,6 +1,7 @@
 # PyGPT
 
-Use python3.12
+Use python3.12.
+Be certain python3.12-dev and c compiler are installed (for torch.compile)
 
 ## Setup Instructions
 
