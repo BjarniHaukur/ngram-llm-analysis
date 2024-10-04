@@ -9,7 +9,12 @@ Project Manager: Jonas
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 10+TBD**
+- Iterated the ngram trie implementation in Rust
+- Implemented a testing bed for speed and memory usage statistics
+- Benchmarked the speed and memory usage of the ngram trie implementation for some million tokens
+- Researched state of the art multithreading solutions for Rust and how we could utilize them
+- The dataset could even fit in under 64GB of RAM
 
 ### Jonas
 - **Number of hours this week: TBD**
@@ -75,9 +80,10 @@ Project Manager: Felix
 ### Boti
 - **Number of hours this week: 15**
 - Itarated the rust NGramTrie implementation
-- Researched best practices for efficient ngram storage
-- Researched multithreading solutions to trie insertions
+- Researched best practices for efficient ngram storage in Rust
+- Researched multithreading solutions to trie insertions Rust
 - Tried small example solutions and started testing them
+- We can save the entire NGramTrie on disk and it would only take some 10GBs of space which is cheap
 
 ### Jonas
 - **Number of hours this week: 4**
