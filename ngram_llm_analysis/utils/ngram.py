@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from functools import lru_cache
 
 CHECKPOINT_PATH = Path("../checkpoints/ngram/")
 CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
@@ -152,6 +153,7 @@ class NGramTrie:
         
         return count
     
+    @lru_cache(maxsize=None)
     def kneser_ney_smoothed_ratios(self, tokens:list[int], rule_context:str, discount:float=0.75)->list[float]:
         """Compute Kneser-Ney smoothed probability ratios for the given tokens and rule context."""
         ratios = []
