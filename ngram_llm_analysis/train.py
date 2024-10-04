@@ -2,7 +2,7 @@ import argparse
 from functools import partial
 from pathlib import Path
 
-import tqdm
+from tqdm import tqdm
 import numpy as np
 import torch
 import torch.nn as nn
@@ -53,11 +53,12 @@ def main(args):
     with open("../configs/" + (args.config if args.config.endswith(".yaml") else args.config + ".yaml"), 'r') as file:
         config = yaml.safe_load(file)
         
-    seq_len = config["max_position_embeddings"]
+    seq_len = config["max_position_embeddings"] - 1
     
     tokenizer_name = config.get("tokenizer_name", "tokenizer")
-
+    print(f"{tokenizer_name=}")
     # ensure tokenizer exists
+    
     try:
         tokenizer = load_tokenizer(tokenizer_name)
     except FileNotFoundError:
@@ -77,7 +78,7 @@ def main(args):
     test_size = len(full_ds) - train_size - val_size
     train_ds, val_ds, _ = random_split(full_ds, [train_size, val_size, test_size])
 
-    collate = partial(collate_fn, max_len=seq_len)
+    collate = partial(collate_fn, max_len=seq_len, tokenizer=tokenizer)
     train_dl = DataLoader(train_ds, batch_size=args.batch_size, collate_fn=collate, shuffle=True, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True)
     val_dl = DataLoader(val_ds, batch_size=args.batch_size, collate_fn=collate, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True)
 
@@ -97,13 +98,13 @@ def main(args):
         optim.load_state_dict(checkpoint['optimizer_state_dict'])
         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
         for param_group in optim.param_groups: param_group["lr"] = args.lr
-        wandb.init(project=args.config.wandb_project, id=checkpoint['wandb_id'], resume="must")
+        wandb.init(project=config["wandb_project"], id=checkpoint['wandb_id'], resume="must")
         start_epoch = checkpoint['epoch']
         print(f"Resuming training from checkpoint {args.continue_from}, starting at epoch {start_epoch}")
     else:
         wandb.init(
             name=args.run_name,
-            project=config.wandb_project,
+            project=config["wandb_project"],
             config={
                 "learning_rate": args.lr,
                 "epochs": args.epochs,
@@ -113,7 +114,7 @@ def main(args):
                 **vars(args),
                 **dict(config),
             },
-            group=config.wandb_group
+            group=config["model_type"]
         )
         start_epoch = 0
         
@@ -135,9 +136,9 @@ def main(args):
             y = batch[..., 1:]
             
             with torch.amp.autocast(device_type=DEVICE, dtype=DTYPE):
-                y_hat = model(x)
-                if isinstance(y_hat, tuple): y_hat = y_hat[0]
-                loss = criterion(y_hat.reshape(-1, config.vocab_size), y.reshape(-1))
+                output = model(x)
+                y_hat = output.logits
+                loss = criterion(y_hat.reshape(-1, tokenizer.get_vocab_size()), y.reshape(-1))
 
             optim.zero_grad()
             scaler.scale(loss).backward()
@@ -165,9 +166,9 @@ def main(args):
                 y_val = val_batch[..., 1:]
 
                 with torch.amp.autocast(device_type=DEVICE, dtype=DTYPE):
-                    y_hat = model(x_val)
-                    if isinstance(y_hat, tuple): y_hat = y_hat[0]
-                    loss = criterion(y_hat.reshape(-1, config.vocab_size), y_val.reshape(-1))
+                    output = model(x_val)
+                    y_hat = output.logits
+                    loss = criterion(y_hat.reshape(-1, tokenizer.get_vocab_size()), y_val.reshape(-1))
                     
                 val_loss = loss.detach().cpu().numpy()
                 total_val_loss += val_loss
@@ -190,12 +191,16 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train transformer model")
-    parser.add_argument("--config", type=str, required=True, help="Name of the model configuration file. Type: .yaml")
     parser.add_argument("--dataset", type=str, required=True, help="Name of dataset file. Type: .txt")
+    parser.add_argument("--config", type=str, required=True, help="Name of the model configuration file. Type: .yaml")
     parser.add_argument("--run_name", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--lr", type=float, default=3e-4)
+    parser.add_argument("--log_interval", type=int, default=100, help="Number of batches between logging training status to Wandb")
+    parser.add_argument("--num_workers", type=int, default=4)
+    parser.add_argument("--prefetch_factor", type=int, default=4)
     parser.add_argument("--continue_from", type=str, default=None, help="Path to checkpoint file to resume training from")
     args = parser.parse_args()
     main(args)
+

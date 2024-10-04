@@ -38,9 +38,9 @@ def save_tokenizer(tokenizer:Tokenizer, filename:str):
     filepath = path(filename)
     tokenizer.save(str(filepath))
 
-def load_tokenizer(filename:str) -> Tokenizer:
+def load_tokenizer(filename:str)->Tokenizer:
     filepath = path(filename)
-    
+
     if not filepath.exists():
         raise FileNotFoundError(f"Tokenizer file {filepath} not found. Please build the tokenizer first.")
     return Tokenizer.from_file(str(filepath))
@@ -115,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("data_name", type=str)
     parser.add_argument("--name", type=str, default="tokenizer")
     parser.add_argument("--proportion", type=float, default=0.5)
-    parser.add_argument("--vocab_size", type=int, default=8096)
+    parser.add_argument("--vocab_size", type=int, default=8192)
     args = parser.parse_args()
 
     build_tokenizer(args.data_name, args.name, args.vocab_size, args.proportion)
