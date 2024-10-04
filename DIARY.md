@@ -20,7 +20,7 @@ Project Manager: Jonas
 #### 1. **Google Cloud Architecture Preparation**:
    - Set up and configure cloud infrastructure to support the n-gram model deployment.
    - Coordinate resource usage within the team to stay within budget and timelines.
-### 2. **Literature Review**:
+#### 2. **Literature Review**:
    - Investigate alternative smoothing techniques mentioned in the reference paper.
    - Identify any gaps or potential flaws in the paper’s methodology.
    - Update references and ensure proper citation of key materials for future use.
