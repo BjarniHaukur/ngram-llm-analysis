@@ -16,17 +16,19 @@ from utils.metrics import bleu_score
 from utils.tokenizer import build_tokenizer, load_tokenizer
 
 torch.random.manual_seed(1337)
+if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
 
 CHECKPOINT_PATH = Path("../checkpoints/models")
 
 def collate_fn(batch, tokenizer, max_len=2048):
     batch = [x[:max_len] for x in batch]
-    batch = [
-        torch.cat([torch.tensor([tokenizer.token_to_id("<bos>")], dtype=torch.long), x, torch.tensor([tokenizer.token_to_id("<eos>")], dtype=torch.long)])
-        for x in batch
-    ]
+    bos_id = tokenizer.token_to_id("<bos>")
+    eos_id = tokenizer.token_to_id("<eos>")
+    pad_id = tokenizer.token_to_id("<pad>")
     
-    return torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=tokenizer.token_to_id("<pad>"))
+    batch = [torch.cat([torch.tensor([bos_id], dtype=torch.long), x, torch.tensor([eos_id], dtype=torch.long)]) for x in batch]
+
+    return torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=pad_id)
 
 def model_from_config(config:dict):    
     model_type = config.get('model_type', '').lower()
@@ -43,20 +45,21 @@ def model_from_config(config:dict):
 def main(args):
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     DTYPE = torch.bfloat16 if DEVICE=="cuda" else torch.float16
-    USE_FUSED = DEVICE=="cuda"
 
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
+    torch.set_float32_matmul_precision('high')
     
     print(f"Training on device: {DEVICE}")
+    print(f"Training in dtype: {DTYPE}")
     
     with open("../configs/" + (args.config if args.config.endswith(".yaml") else args.config + ".yaml"), 'r') as file:
         config = yaml.safe_load(file)
         
-    seq_len = config["max_position_embeddings"] - 1
+    seq_len = config["max_position_embeddings"] - 1  # account for <bos> and <eos>
     
     tokenizer_name = config.get("tokenizer_name", "tokenizer")
-    print(f"{tokenizer_name=}")
+    print(f"Using tokenizer: {tokenizer_name}")
     # ensure tokenizer exists
     
     try:
@@ -82,9 +85,9 @@ def main(args):
     train_dl = DataLoader(train_ds, batch_size=args.batch_size, collate_fn=collate, shuffle=True, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True)
     val_dl = DataLoader(val_ds, batch_size=args.batch_size, collate_fn=collate, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True)
 
-    model = model_from_config(config).to(DEVICE)
-    optim = AdamW(model.parameters(), lr=args.lr, fused=USE_FUSED)
-    scaler = torch.amp.GradScaler(enabled=USE_FUSED)
+    model = model_from_config(config).to(DEVICE, dtype=DTYPE)
+    model = torch.compile(model, backend="aot_eager")
+    optim = AdamW(model.parameters(), lr=args.lr, fused=DEVICE=="cuda")
     scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=1, gamma=0.9)
 
     print(f"Training model with {sum([p.numel() for p in model.parameters() if p.requires_grad])/1e6:.2f}M parameters")
@@ -123,7 +126,6 @@ def main(args):
     model_path = CHECKPOINT_PATH / wandb.run.name
     model_path.mkdir(parents=True, exist_ok=True)
     
-    # model = torch.compile(model)
     model.train()
 
     for epoch in range(start_epoch, start_epoch + args.epochs):
@@ -131,19 +133,18 @@ def main(args):
         total_train_loss = 0
 
         for i, batch in enumerate(train_tqdm):
-            batch = batch.to(DEVICE)
+            batch = batch.to(DEVICE, non_blocking=True)
             x = batch[..., :-1]
             y = batch[..., 1:]
             
-            with torch.amp.autocast(device_type=DEVICE, dtype=DTYPE):
+            with torch.autocast(device_type=DEVICE, dtype=DTYPE, enabled=DEVICE=="cuda"):
                 output = model(x)
                 y_hat = output.logits
                 loss = criterion(y_hat.reshape(-1, tokenizer.get_vocab_size()), y.reshape(-1))
 
             optim.zero_grad()
-            scaler.scale(loss).backward()
-            scaler.step(optim)
-            scaler.update()
+            loss.backward()
+            optim.step()
 
             train_loss = loss.detach().cpu().numpy()
             total_train_loss += train_loss
@@ -161,15 +162,15 @@ def main(args):
         with torch.no_grad():
             val_tqdm = tqdm(val_dl, desc=f"Epoch {epoch + 1}/{start_epoch + args.epochs} Validation")
             for val_batch in val_tqdm:
-                val_batch = val_batch.to(DEVICE)
+                val_batch = val_batch.to(DEVICE, non_blocking=True)
                 x_val = val_batch[..., :-1]
                 y_val = val_batch[..., 1:]
 
-                with torch.amp.autocast(device_type=DEVICE, dtype=DTYPE):
+                with torch.autocast(device_type=DEVICE, dtype=DTYPE, enabled=DEVICE=="cuda"):
                     output = model(x_val)
                     y_hat = output.logits
                     loss = criterion(y_hat.reshape(-1, tokenizer.get_vocab_size()), y_val.reshape(-1))
-                    
+                
                 val_loss = loss.detach().cpu().numpy()
                 total_val_loss += val_loss
                 val_tqdm.set_postfix({"val_loss": f"{val_loss:.3f}"})
@@ -203,9 +204,4 @@ if __name__ == "__main__":
     parser.add_argument("--continue_from", type=str, default=None, help="Path to checkpoint file to resume training from")
     args = parser.parse_args()
 
-    import time
-    start_time = time.time()
     main(args)
-    end_time = time.time()
-    print(f"Training completed in {end_time - start_time:.2f} seconds")
-
