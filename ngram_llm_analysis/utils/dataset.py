@@ -67,9 +67,6 @@ class MemmapDataset(Dataset):
                 pbar.update(len(batch_lines))
             pbar.close()
 
-        if verbose:
-            print(f"Total tokens: {total_tokens}")
-
         # Create memmap with the determined shape
         memmap_path = memmap_dir / (tokenizer_name + ".dat")
         memmap = np.memmap(memmap_path, mode="w+", dtype='uint16', shape=(total_tokens,))
@@ -92,8 +89,6 @@ class MemmapDataset(Dataset):
 
         memmap.flush()
         temp_file.close()
-
-
         print(f"Memmap created with {total_tokens} tokens.")
     
     @staticmethod
