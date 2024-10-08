@@ -99,7 +99,7 @@ def main(args):
 
     model = model_from_config(config).to(DEVICE)
     model = torch.compile(model, backend="aot_eager")
-    optim = AdamW(model.parameters(), lr=args.lr, fused=DEVICE=="cuda")
+    optim = AdamW(model.parameters(), lr=args.max_lr, fused=DEVICE=="cuda")
 
     print(f"Training model with {sum([p.numel() for p in model.parameters() if p.requires_grad])/1e6:.2f}M parameters")
 
