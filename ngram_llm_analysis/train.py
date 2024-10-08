@@ -32,7 +32,7 @@ def collate_fn(batch, tokenizer, max_len=2048):
 
     return torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=pad_id)
 
-def model_from_config(config:dict):    
+def model_from_config(config:dict)->nn.Module:    
     model_type = config.get("model_type", "").lower()
     
     if model_type == "llama":
@@ -150,6 +150,7 @@ def main(args):
         y = batch[..., 1:]
 
         lr = get_lr(step)
+        wandb.log({"learning_rate": lr}, step=step)
         for param_group in optim.param_groups: param_group["lr"] = lr
             
         with torch.autocast(device_type=DEVICE, dtype=DTYPE, enabled=DEVICE=="cuda"):
