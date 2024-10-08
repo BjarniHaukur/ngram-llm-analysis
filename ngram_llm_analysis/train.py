@@ -138,6 +138,8 @@ def main(args):
     model.train()
 
     # TODO: smoothed loss
+    train_loss = float("inf")
+    val_loss = float("inf")
 
     step_tqdm = tqdm(range(CURRENT_STEP, TOTAL_STEPS), desc="Training...")
     for step in step_tqdm:
@@ -164,7 +166,7 @@ def main(args):
             "train_loss": train_loss,
             "train_perplexity": perplexity
         }, step=step)
-        step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}"})
+        step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
 
         if step % VAL_INTERVAL == 0 and step != 0:
             model.eval()
@@ -186,7 +188,7 @@ def main(args):
                         "val_loss": val_loss,
                         "val_perplexity": perplexity
                     }, step=step)
-                    step_tqdm.set_postfix({"val_loss": f"{val_loss:.3f}"})
+                    step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
                     
             model.train()
             step_tqdm.set_description("Training...")
