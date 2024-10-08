@@ -15,14 +15,13 @@ DATA_PATH = Path("../data/")
 
 class MemmapDataset(Dataset):
     """Reads tokens from a memmap file."""
-    def __init__(self, dataset_file:str, tokenizer_name:str, num_tokens:int = 4096):
+    def __init__(self, dataset_file:str, tokenizer_name:str, num_tokens:int = 2048):
         self.memmap = np.memmap(
             DATA_PATH / dataset_file.removesuffix(".txt") / (tokenizer_name + ".dat"),
             dtype="uint16", mode="r"
         )
         self.num_tokens = num_tokens
 
-    @lru_cache()
     def __getitem__(self, idx: int):
         if idx < 0: idx += len(self)
         tokens = self.memmap[idx * self.num_tokens: (idx + 1) * self.num_tokens]
@@ -90,11 +89,6 @@ class MemmapDataset(Dataset):
         memmap.flush()
         temp_file.close()
         print(f"Memmap created with {total_tokens} tokens.")
-    
-    @staticmethod
-    def exists(dataset_file:str, tokenizer_name:str) -> bool:
-        path = DATA_PATH / dataset_file.removesuffix(".txt") / (tokenizer_name + ".dat")
-        return Path(path).exists()
 
 if __name__ == "__main__":
     import time
