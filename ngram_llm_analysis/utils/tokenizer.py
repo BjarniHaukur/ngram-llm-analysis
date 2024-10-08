@@ -5,7 +5,7 @@ from typing import Tuple
 from tokenizers import Tokenizer
 from tokenizers.models import BPE
 from tokenizers.trainers import BpeTrainer
-from tokenizers.pre_tokenizers import ByteLevel
+from tokenizers.pre_tokenizers import ByteLevel, Whitespace
 from tokenizers.decoders import ByteLevel as ByteLevelDecoder
 
 CHECKPOINT_PATH = Path("../checkpoints/tokenizer/")
@@ -17,13 +17,13 @@ UNK, UNK_ID = "<unk>", 3
 
 def fit_tokenizer(text_iterator, vocab_size:int) -> Tokenizer:
     tokenizer = Tokenizer(BPE(unk_token=UNK))
-    tokenizer.pre_tokenizer = ByteLevel()
+    tokenizer.pre_tokenizer = Whitespace()
     tokenizer.decoder = ByteLevelDecoder()
 
     trainer = BpeTrainer(
         special_tokens=[UNK, PAD, BOS, EOS],
         vocab_size=vocab_size,
-        min_frequency=1,
+        min_frequency=2,
         show_progress=True,
     )
 

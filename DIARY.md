@@ -42,7 +42,15 @@ Project Manager: Bjarni
 Project Manager: Jonas
 
 ### Bjarni
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8**
+- Updated the training script
+  - Dropped HF Trainer since it was too constraining for custom metric logging, in particular asynchronous logging of metrics
+  - Implemented a custom training loop from scratch
+  - Use all optimization tricks like fused AdamW, bfloat16, torch.compile, powers of 2, etc.
+- Optimized the Tokenizer creation function, now can handle arbitrarily large datasets
+- Optimized the MemmapDataset creation function, now can handle arbitrarily large datasets
+- The Memmap enables fast training, eliminating any and all possible bottlenecks of the tokenization / dataloading process
+- Currently 1 epoch of training on TinyStories takes around 2:20h with 140M params on the KTH cluster
 
 ### Boti
 - **Number of hours this week: 10+TBD**
