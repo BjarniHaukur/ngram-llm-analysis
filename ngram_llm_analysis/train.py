@@ -1,19 +1,21 @@
+import math
 import argparse
-from functools import partial
 from pathlib import Path
+from functools import partial
+from itertools import cycle
 
-from tqdm import tqdm
+import yaml
+import wandb
 import numpy as np
+from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
-import wandb
-import yaml
 from torch.utils.data import random_split, DataLoader
 from transformers import GPT2Config, GPT2LMHeadModel, LlamaConfig, LlamaForCausalLM
+
 from utils.dataset import MemmapDataset
-from utils.metrics import bleu_score
-from utils.tokenizer import build_tokenizer, load_tokenizer
+from utils.tokenizer import load_tokenizer
 
 torch.random.manual_seed(1337)
 if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
@@ -31,16 +33,17 @@ def collate_fn(batch, tokenizer, max_len=2048):
     return torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=pad_id)
 
 def model_from_config(config:dict):    
-    model_type = config.get('model_type', '').lower()
+    model_type = config.get("model_type", "").lower()
     
-    if model_type == 'llama':
+    if model_type == "llama":
         model_config = LlamaConfig(**config)
         return LlamaForCausalLM(model_config)
-    elif model_type == 'gpt2':
+    elif model_type == "gpt2":
         model_config = GPT2Config(**config)
         return GPT2LMHeadModel(model_config)
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
+    
 
 def main(args):
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -48,32 +51,20 @@ def main(args):
 
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
-    torch.set_float32_matmul_precision('high')
+    torch.set_float32_matmul_precision("high")
     
     print(f"Training on device: {DEVICE}")
     print(f"Training in dtype: {DTYPE}")
     
-    with open("../configs/" + (args.config if args.config.endswith(".yaml") else args.config + ".yaml"), 'r') as file:
+    with open("../configs/" + (args.config if args.config.endswith(".yaml") else args.config + ".yaml"), "r") as file:
         config = yaml.safe_load(file)
         
     seq_len = config["max_position_embeddings"] - 1  # account for <bos> and <eos>
-    
     tokenizer_name = config.get("tokenizer_name", "tokenizer")
     print(f"Using tokenizer: {tokenizer_name}")
-    # ensure tokenizer exists
     
-    try:
-        tokenizer = load_tokenizer(tokenizer_name)
-    except FileNotFoundError:
-        print(f"Tokenizer file '{tokenizer_name}' not found. Building tokenizer...")
-        tokenizer = build_tokenizer(data_name=args.dataset, name=tokenizer_name, vocab_size=config["vocab_size"])
+    tokenizer = load_tokenizer(tokenizer_name)
     tokenizer.pad_token = tokenizer.token_to_id("<pad>")
-    
-    # ensure memmap exists corresponding to the tokenizer
-    if not MemmapDataset.exists(dataset_file=args.dataset, tokenizer_name=tokenizer_name):
-        print(f"Memmap file '{args.dataset}' not found. Building memmap...")
-        MemmapDataset.build_memmap(args.dataset, tokenizer_name)
-    
     full_ds = MemmapDataset(dataset_file=args.dataset, tokenizer_name=tokenizer_name, num_tokens=seq_len)
     
     train_size = int(0.8 * len(full_ds))
@@ -81,14 +72,34 @@ def main(args):
     test_size = len(full_ds) - train_size - val_size
     train_ds, val_ds, _ = random_split(full_ds, [train_size, val_size, test_size])
 
-    collate = partial(collate_fn, max_len=seq_len, tokenizer=tokenizer)
-    train_dl = DataLoader(train_ds, batch_size=args.batch_size, collate_fn=collate, shuffle=True, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True)
-    val_dl = DataLoader(val_ds, batch_size=args.batch_size, collate_fn=collate, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True)
+    CURRENT_STEP = 0
+    STEPS_PER_EPOCH_TRAIN = len(train_ds) // args.batch_size  # Drop last is True
+    TOTAL_STEPS = STEPS_PER_EPOCH_TRAIN * args.epochs
+    VAL_INTERVAL = STEPS_PER_EPOCH_TRAIN // 100
+    NUM_VAL_STEPS = STEPS_PER_EPOCH_TRAIN // VAL_INTERVAL
+    WARMUP_STEPS = int(0.03 * TOTAL_STEPS)
 
-    model = model_from_config(config).to(DEVICE, dtype=DTYPE)
+    CHECKPOINT_INTERVAL = STEPS_PER_EPOCH_TRAIN // 10
+
+    def get_lr(step):
+        if step < WARMUP_STEPS:  # 1) linear warmup for WARMUP_STEPS steps
+            return args.max_lr * (step + 1) / WARMUP_STEPS
+        if step > TOTAL_STEPS:  # 2) if it > TOTAL_STEPS, return min learning rate
+            return args.min_lr
+        # 3) in between, use cosine decay down to min learning rate
+        decay_ratio = (step - WARMUP_STEPS) / (TOTAL_STEPS - WARMUP_STEPS)
+        assert 0 <= decay_ratio <= 1
+        coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio)) # coeff starts at 1 and goes to 0
+        return args.min_lr + coeff * (args.max_lr - args.min_lr)
+
+    # make the dataloaders cycle on end of dataset, so we can keep calling next() on them
+    collate = partial(collate_fn, max_len=seq_len, tokenizer=tokenizer)
+    train_dl = cycle(DataLoader(train_ds, batch_size=args.batch_size, collate_fn=collate, shuffle=True, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True, drop_last=True))
+    val_dl = cycle(DataLoader(val_ds, batch_size=args.batch_size, collate_fn=collate, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True, drop_last=True))
+
+    model = model_from_config(config).to(DEVICE)
     model = torch.compile(model, backend="aot_eager")
     optim = AdamW(model.parameters(), lr=args.lr, fused=DEVICE=="cuda")
-    scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=1, gamma=0.9)
 
     print(f"Training model with {sum([p.numel() for p in model.parameters() if p.requires_grad])/1e6:.2f}M parameters")
 
@@ -97,13 +108,12 @@ def main(args):
 
     if args.continue_from:
         checkpoint = torch.load(CHECKPOINT_PATH / args.continue_from, map_location=DEVICE)
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optim.load_state_dict(checkpoint['optimizer_state_dict'])
-        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        model.load_state_dict(checkpoint["model_state_dict"])
+        optim.load_state_dict(checkpoint["optimizer_state_dict"])
         for param_group in optim.param_groups: param_group["lr"] = args.lr
-        wandb.init(project=config["wandb_project"], id=checkpoint['wandb_id'], resume="must")
-        start_epoch = checkpoint['epoch']
-        print(f"Resuming training from checkpoint {args.continue_from}, starting at epoch {start_epoch}")
+        wandb.init(project=config["wandb_project"], id=checkpoint["wandb_id"], resume="must")
+        CURRENT_STEP = checkpoint["current_step"]
+        print(f"Resuming training from checkpoint {args.continue_from}, starting at step {CURRENT_STEP}")
     else:
         wandb.init(
             name=args.run_name,
@@ -119,7 +129,6 @@ def main(args):
             },
             group=config["model_type"]
         )
-        start_epoch = 0
         
     criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.token_to_id("<pad>"))
 
@@ -128,67 +137,80 @@ def main(args):
     
     model.train()
 
-    for epoch in range(start_epoch, start_epoch + args.epochs):
-        train_tqdm = tqdm(train_dl, desc=f"Epoch {epoch + 1}/{start_epoch + args.epochs} Training")
-        total_train_loss = 0
+    # TODO: smoothed loss
 
-        for i, batch in enumerate(train_tqdm):
-            batch = batch.to(DEVICE, non_blocking=True)
-            x = batch[..., :-1]
-            y = batch[..., 1:]
+    RUNNING_STEPS = 10
+    running_loss_train, running_loss_val = 0, 0
+    running_perplex_train, running_perplex_val = 0, 0
+
+    step_tqdm = tqdm(range(CURRENT_STEP, TOTAL_STEPS), desc="Training...")
+    for step in step_tqdm:
+        batch = next(train_dl).to(DEVICE, non_blocking=True)
+        x = batch[..., :-1]
+        y = batch[..., 1:]
+
+        lr = get_lr(step)
+        for param_group in optim.param_groups: param_group["lr"] = lr
             
-            with torch.autocast(device_type=DEVICE, dtype=DTYPE, enabled=DEVICE=="cuda"):
-                output = model(x)
-                y_hat = output.logits
-                loss = criterion(y_hat.reshape(-1, tokenizer.get_vocab_size()), y.reshape(-1))
+        with torch.autocast(device_type=DEVICE, dtype=DTYPE, enabled=DEVICE=="cuda"):
+            output = model(x)
+            y_hat = output.logits
+            loss = criterion(y_hat.reshape(-1, tokenizer.get_vocab_size()), y.reshape(-1))
 
-            optim.zero_grad()
-            loss.backward()
-            optim.step()
+        optim.zero_grad()
+        loss.backward()
+        optim.step()
 
-            train_loss = loss.detach().cpu().numpy()
-            total_train_loss += train_loss
-            train_tqdm.set_postfix({"loss": f"{train_loss:.3f}"})
+        train_loss = loss.detach().cpu().numpy()
+        running_loss_train += train_loss
+        running_perplex_train += np.exp(train_loss)
+        if step % RUNNING_STEPS == 0:
+            wandb.log({
+                "running_train_loss": running_loss_train / RUNNING_STEPS,
+                "running_train_perplexity": running_perplex_train / RUNNING_STEPS
+            }, step=step)
+            step_tqdm.set_postfix({"train_loss": f"{running_loss_train / RUNNING_STEPS:.3f}"})
+            running_loss_train = 0
+            running_perplex_train = 0
 
-            if i % args.log_interval == 0:
-                wandb.log({"train_loss": train_loss}, step=epoch * len(train_dl) + i, commit=True)
+        if step % VAL_INTERVAL == 0:
+            model.eval()
+            step_tqdm.set_description("Validating...")
+            with torch.no_grad():
+                for _ in range(NUM_VAL_STEPS):
+                    val_batch = next(val_dl).to(DEVICE, non_blocking=True)
+                    x_val = val_batch[..., :-1]
+                    y_val = val_batch[..., 1:]
 
-        scheduler.step()
-        wandb.log({"avg_train_loss": total_train_loss / len(train_dl)}, step=(epoch+1) * len(train_dl)) # to get it on the same axis
+                    with torch.autocast(device_type=DEVICE, dtype=DTYPE, enabled=DEVICE=="cuda"):
+                        output = model(x_val)
+                        y_hat = output.logits
+                        loss = criterion(y_hat.reshape(-1, tokenizer.get_vocab_size()), y_val.reshape(-1))
+                    
+                    val_loss = loss.detach().cpu().numpy()
+                    running_loss_val += val_loss
+                    running_perplex_val += np.exp(val_loss)
+                    if step % RUNNING_STEPS == 0:
+                        wandb.log({
+                            "running_val_loss": running_loss_val / RUNNING_STEPS,
+                            "running_val_perplexity": running_perplex_val / RUNNING_STEPS
+                        }, step=step)
+                        step_tqdm.set_postfix({"val_loss": f"{running_loss_val / RUNNING_STEPS:.3f}"})
+                        running_loss_val = 0
+                        running_perplex_val = 0
+                    
+            model.train()
+            step_tqdm.set_description("Training...")
 
-        model.eval()
-        total_val_loss = 0.0
-        total_val_perplex = 0.0
-        with torch.no_grad():
-            val_tqdm = tqdm(val_dl, desc=f"Epoch {epoch + 1}/{start_epoch + args.epochs} Validation")
-            for val_batch in val_tqdm:
-                val_batch = val_batch.to(DEVICE, non_blocking=True)
-                x_val = val_batch[..., :-1]
-                y_val = val_batch[..., 1:]
 
-                with torch.autocast(device_type=DEVICE, dtype=DTYPE, enabled=DEVICE=="cuda"):
-                    output = model(x_val)
-                    y_hat = output.logits
-                    loss = criterion(y_hat.reshape(-1, tokenizer.get_vocab_size()), y_val.reshape(-1))
-                
-                val_loss = loss.detach().cpu().numpy()
-                total_val_loss += val_loss
-                val_tqdm.set_postfix({"val_loss": f"{val_loss:.3f}"})
-                
-                total_val_perplex += np.exp(val_loss)
-                
-        wandb.log({"avg_val_loss": total_val_loss / len(val_dl)}, step=(epoch+1) * len(train_dl)) # to get it on the same axis
-        wandb.log({"avg_val_perplexity": total_val_perplex / len(val_dl)}, step=(epoch+1) * len(train_dl))
-
-        torch.save({
-            'epoch': epoch + 1,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optim.state_dict(),
-            'scheduler_state_dict': scheduler.state_dict(),
-            'loss': total_train_loss / len(train_dl),
-            'wandb_id': wandb.run.id,
-            'config_name': args.config
-        }, model_path / f"epoch_{epoch + 1}.pt")
+        if step % CHECKPOINT_INTERVAL == 0:
+            torch.save({
+                "current_step": step,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optim.state_dict(),
+                "wandb_id": wandb.run.id,
+                "config_name": args.config
+            }, model_path / f"{step + 1}.pt")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train transformer model")
@@ -197,7 +219,8 @@ if __name__ == "__main__":
     parser.add_argument("--run_name", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=5)
-    parser.add_argument("--lr", type=float, default=3e-4)
+    parser.add_argument("--max_lr", type=float, default=6e-4)
+    parser.add_argument("--min_lr", type=float, default=6e-5)
     parser.add_argument("--log_interval", type=int, default=100, help="Number of batches between logging training status to Wandb")
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--prefetch_factor", type=int, default=4)
