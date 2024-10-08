@@ -1,5 +1,41 @@
 # Team Diary
 
+## Week 41 (07.10.2024 - 13.10.2024)
+Project Manager: Bjarni
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+
+### Peer Group Meeting
+
+#### Training Performance & Implementation
+- **Training Speed**: The other group’s training is significantly slower than our group’s.
+- **Training Loop**: We are using a custom training loop, while the other group is struggling with training speed.
+- **Library Usage**: Our group uses a different library for training, which provides performance metrics not available in the standard implementation, as we use a partition. Bjarni pointed out these differences in libraries.
+- **Training Loss**: We haven’t completed a long training run yet. During a 10-minute run, the training loss decreased from 8-9 to 2-3.
+#### N-Gram & Dataset Setup
+- **N-Gram Statistics**: Our group will only begin full training once the n-gram statistics are ready. Boti is working on the n-gram setup, which should be completed by Thursday.
+- **Dataset**: The entire TinyStories Dataset is being used for training by our group.
+- **Context Window**: The other group is using the default GPT-2 context window.
+#### Feasibility & Accuracy
+- **Feasibility Calculation**: Bjarni calculated that a 2-hour training run is feasible given the available FLOPS, but we will triple-check to ensure there are no errors. The large time difference between the groups’ implementations is a concern.
+- **Accuracy**: We haven’t evaluated the accuracy yet since we haven’t done full training. The other group achieved 85% accuracy after 25 hours of training.
+#### Group Collaboration & Communication
+- **Assistance to the Other Group**: Bjarni plans to help the other group after the meeting.
+- **Group Chat**: We decided to be more active in the group chat.
+
+### Supervisor Meeting
+- Scheduled for this Thursday 3pm
+  
 ---
 
 ## Week 40 (30.09.2024 - 06.10.2024)
@@ -20,7 +56,7 @@ Project Manager: Jonas
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8h**
 
 #### 1. **Google Cloud Architecture Preparation**:
    - Set up and configure cloud infrastructure to support the n-gram model deployment.
