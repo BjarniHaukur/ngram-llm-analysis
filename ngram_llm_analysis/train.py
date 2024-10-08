@@ -139,10 +139,6 @@ def main(args):
 
     # TODO: smoothed loss
 
-    RUNNING_STEPS = 10
-    running_loss_train, running_loss_val = 0, 0
-    running_perplex_train, running_perplex_val = 0, 0
-
     step_tqdm = tqdm(range(CURRENT_STEP, TOTAL_STEPS), desc="Training...")
     for step in step_tqdm:
         batch = next(train_dl).to(DEVICE, non_blocking=True)
@@ -163,18 +159,14 @@ def main(args):
         optim.step()
 
         train_loss = loss.detach().cpu().numpy()
-        running_loss_train += train_loss
-        running_perplex_train += np.exp(train_loss)
-        if step % RUNNING_STEPS == 0:
-            wandb.log({
-                "running_train_loss": running_loss_train / RUNNING_STEPS,
-                "running_train_perplexity": running_perplex_train / RUNNING_STEPS
-            }, step=step)
-            step_tqdm.set_postfix({"train_loss": f"{running_loss_train / RUNNING_STEPS:.3f}"})
-            running_loss_train = 0
-            running_perplex_train = 0
+        perplexity = np.exp(train_loss)
+        wandb.log({
+            "train_loss": train_loss,
+            "train_perplexity": perplexity
+        }, step=step)
+        step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}"})
 
-        if step % VAL_INTERVAL == 0:
+        if step % VAL_INTERVAL == 0 and step != 0:
             model.eval()
             step_tqdm.set_description("Validating...")
             with torch.no_grad():
@@ -189,16 +181,12 @@ def main(args):
                         loss = criterion(y_hat.reshape(-1, tokenizer.get_vocab_size()), y_val.reshape(-1))
                     
                     val_loss = loss.detach().cpu().numpy()
-                    running_loss_val += val_loss
-                    running_perplex_val += np.exp(val_loss)
-                    if step % RUNNING_STEPS == 0:
-                        wandb.log({
-                            "running_val_loss": running_loss_val / RUNNING_STEPS,
-                            "running_val_perplexity": running_perplex_val / RUNNING_STEPS
-                        }, step=step)
-                        step_tqdm.set_postfix({"val_loss": f"{running_loss_val / RUNNING_STEPS:.3f}"})
-                        running_loss_val = 0
-                        running_perplex_val = 0
+                    perplexity = np.exp(val_loss)
+                    wandb.log({
+                        "val_loss": val_loss,
+                        "val_perplexity": perplexity
+                    }, step=step)
+                    step_tqdm.set_postfix({"val_loss": f"{val_loss:.3f}"})
                     
             model.train()
             step_tqdm.set_description("Training...")
