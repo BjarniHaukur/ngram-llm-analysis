@@ -172,6 +172,8 @@ def main(args):
             model.eval()
             step_tqdm.set_description("Validating...")
             with torch.no_grad():
+                total_val_loss = 0
+                total_val_perplexity = 0
                 for _ in range(NUM_VAL_STEPS):
                     val_batch = next(val_dl).to(DEVICE, non_blocking=True)
                     x_val = val_batch[..., :-1]
@@ -184,12 +186,14 @@ def main(args):
                     
                     val_loss = loss.detach().cpu().numpy()
                     perplexity = np.exp(val_loss)
-                    wandb.log({
-                        "val_loss": val_loss,
-                        "val_perplexity": perplexity
-                    }, step=step)
+                    total_val_loss += val_loss
+                    total_val_perplexity += perplexity
                     step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
                     
+                wandb.log({
+                    "val_loss": total_val_loss / NUM_VAL_STEPS,
+                    "val_perplexity": total_val_perplexity / NUM_VAL_STEPS
+                }, step=step)
             model.train()
             step_tqdm.set_description("Training...")
 
