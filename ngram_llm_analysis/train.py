@@ -110,7 +110,7 @@ def main(args):
         checkpoint = torch.load(CHECKPOINT_PATH / args.continue_from, map_location=DEVICE)
         model.load_state_dict(checkpoint["model_state_dict"])
         optim.load_state_dict(checkpoint["optimizer_state_dict"])
-        for param_group in optim.param_groups: param_group["lr"] = args.lr
+        for param_group in optim.param_groups: param_group["lr"] = get_lr(CURRENT_STEP)
         wandb.init(project=config["wandb_project"], id=checkpoint["wandb_id"], resume="must")
         CURRENT_STEP = checkpoint["current_step"]
         print(f"Resuming training from checkpoint {args.continue_from}, starting at step {CURRENT_STEP}")
@@ -119,7 +119,7 @@ def main(args):
             name=args.run_name,
             project=config["wandb_project"],
             config={
-                "learning_rate": args.lr,
+                "learning_rate": args.max_lr,
                 "epochs": args.epochs,
                 "n_training_examples": len(train_ds),
                 "n_validation_examples": len(val_ds),
