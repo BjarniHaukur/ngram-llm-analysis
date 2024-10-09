@@ -95,13 +95,13 @@ def main(args):
     model_path.mkdir(parents=True, exist_ok=True)
 
     if args.continue_from:
-        print(f"Resuming training from checkpoint {args.continue_from}, starting at step {CURRENT_STEP}")
         checkpoint = torch.load(model_path / args.continue_from, map_location=DEVICE)
         model.load_state_dict(checkpoint["model_state_dict"], strict=True)
         optim.load_state_dict(checkpoint["optimizer_state_dict"])
         for param_group in optim.param_groups: param_group["lr"] = get_lr(CURRENT_STEP)
         wandb.init(project=config["wandb_project"], id=checkpoint["wandb_id"], resume="must")
         CURRENT_STEP = checkpoint["current_step"]
+        print(f"Resuming training from checkpoint {args.continue_from}, starting at step {CURRENT_STEP}")
     else:
         wandb.init(
             name=args.run_name,
@@ -128,7 +128,7 @@ def main(args):
     train_loss = float("inf")
     val_loss = float("inf")
 
-    step_tqdm = tqdm(range(CURRENT_STEP, TOTAL_STEPS), desc="Training...")
+    step_tqdm = tqdm(range(CURRENT_STEP, TOTAL_STEPS), desc="Training...", initial=CURRENT_STEP, total=TOTAL_STEPS)
     for step in step_tqdm:
         batch = next(train_dl).to(DEVICE, non_blocking=True)
         x = batch[..., :-1]
