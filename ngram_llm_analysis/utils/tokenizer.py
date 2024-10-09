@@ -17,13 +17,13 @@ UNK, UNK_ID = "<unk>", 3
 
 def fit_tokenizer(text_iterator, vocab_size:int) -> Tokenizer:
     tokenizer = Tokenizer(BPE(unk_token=UNK))
-    tokenizer.pre_tokenizer = Whitespace()
+    tokenizer.pre_tokenizer = ByteLevel()
     tokenizer.decoder = ByteLevelDecoder()
 
     trainer = BpeTrainer(
         special_tokens=[UNK, PAD, BOS, EOS],
         vocab_size=vocab_size,
-        min_frequency=2,
+        min_frequency=1,
         show_progress=True,
     )
 
