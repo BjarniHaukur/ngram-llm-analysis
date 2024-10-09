@@ -95,9 +95,8 @@ def main(args):
     model_path.mkdir(parents=True, exist_ok=True)
 
     if args.continue_from:
-        print(CHECKPOINT_PATH)
         print(f"Resuming training from checkpoint {args.continue_from}, starting at step {CURRENT_STEP}")
-        checkpoint = torch.load(CHECKPOINT_PATH / args.continue_from, map_location=DEVICE)
+        checkpoint = torch.load(model_path / args.continue_from, map_location=DEVICE)
         state_dict = checkpoint["model_state_dict"]
         state_dict = {k.replace("_orig_mod.", ""): v for k, v in state_dict.items()}  # Remove "_orig_mod." prefix from keys
         model.load_state_dict(state_dict, strict=True)
