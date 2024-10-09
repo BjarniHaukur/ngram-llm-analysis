@@ -7,7 +7,12 @@ Project Manager: Bjarni
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: ~15+**
+- Iterated the ngram trie implementation in Rust
+- Code cleanup
+- Switched to u16 for keys
+- Switched to BTreeMap for less memory usage
+- Benchmarking memory usage and speed
 
 ### Jonas
 - **Number of hours this week: TBD**
@@ -53,12 +58,14 @@ Project Manager: Jonas
 - Currently 1 epoch of training on TinyStories takes around 2:20h with 140M params on the KTH cluster
 
 ### Boti
-- **Number of hours this week: 10+TBD**
+- **Number of hours this week: 20**
 - Iterated the ngram trie implementation in Rust
 - Implemented a testing bed for speed and memory usage statistics
 - Benchmarked the speed and memory usage of the ngram trie implementation for some million tokens
 - Researched state of the art multithreading solutions for Rust and how we could utilize them
 - The dataset could even fit in under 64GB of RAM
+- Researched smoothing algorithms (Chen & Goodman, 1998)
+- Implemented Kneser-Ney smoothing
 
 ### Jonas
 - **Number of hours this week: TBD**
