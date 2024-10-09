@@ -79,7 +79,7 @@ def main(args):
     NUM_VAL_STEPS = STEPS_PER_EPOCH_TRAIN // VAL_INTERVAL
     WARMUP_STEPS = int(0.03 * TOTAL_STEPS)
 
-    CHECKPOINT_INTERVAL = STEPS_PER_EPOCH_TRAIN // 10
+    CHECKPOINT_INTERVAL = TOTAL_STEPS // 10
 
     def get_lr(step):
         if step < WARMUP_STEPS:  # 1) linear warmup for WARMUP_STEPS steps
