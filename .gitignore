@@ -24,3 +24,5 @@ checkpoints/*s
 # ignore pytorch models (just being doubly sure)
 **/*.ckpt
 **/*.pt
+
+**/.ipynb_checkpoints/
