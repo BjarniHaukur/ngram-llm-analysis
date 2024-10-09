@@ -16,7 +16,7 @@ from torch.utils.data import random_split, DataLoader
 from utils.dataset import MemmapDataset
 from utils.tokenizer import load_tokenizer, color_text_html
 from utils.sample import stream_generation
-from utils.model import model_from_checkpoint, model_from_config
+from utils.model import model_from_config
 
 torch.random.manual_seed(1337)
 if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
