@@ -12,12 +12,11 @@ import torch
 import torch.nn as nn
 from torch.optim import AdamW
 from torch.utils.data import random_split, DataLoader
-from transformers import GPT2Config, GPT2LMHeadModel, LlamaConfig, LlamaForCausalLM
 
 from utils.dataset import MemmapDataset
 from utils.tokenizer import load_tokenizer, color_text_html
 from utils.sample import stream_generation
-
+from utils.model import model_from_checkpoint, model_from_config
 
 torch.random.manual_seed(1337)
 if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
@@ -33,19 +32,6 @@ def collate_fn(batch, tokenizer, max_len=2048):
     batch = [torch.cat([torch.tensor([bos_id], dtype=torch.long), x, torch.tensor([eos_id], dtype=torch.long)]) for x in batch]
 
     return torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=pad_id)
-
-def model_from_config(config:dict)->nn.Module:    
-    model_type = config.get("model_type", "").lower()
-    
-    if model_type == "llama":
-        model_config = LlamaConfig(**config)
-        return LlamaForCausalLM(model_config)
-    elif model_type == "gpt2":
-        model_config = GPT2Config(**config)
-        return GPT2LMHeadModel(model_config)
-    else:
-        raise ValueError(f"Unsupported model type: {model_type}")
-    
 
 def main(args):
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -110,7 +96,9 @@ def main(args):
 
     if args.continue_from:
         checkpoint = torch.load(CHECKPOINT_PATH / args.continue_from, map_location=DEVICE)
-        model.load_state_dict(checkpoint["model_state_dict"])
+        state_dict = checkpoint["model_state_dict"]
+        state_dict = {k.replace("_orig_mod.", ""): v for k, v in state_dict.items()}  # Remove "_orig_mod." prefix from keys
+        model.load_state_dict(state_dict, strict=True)
         optim.load_state_dict(checkpoint["optimizer_state_dict"])
         for param_group in optim.param_groups: param_group["lr"] = get_lr(CURRENT_STEP)
         wandb.init(project=config["wandb_project"], id=checkpoint["wandb_id"], resume="must")
