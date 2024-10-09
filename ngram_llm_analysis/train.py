@@ -97,9 +97,7 @@ def main(args):
     if args.continue_from:
         print(f"Resuming training from checkpoint {args.continue_from}, starting at step {CURRENT_STEP}")
         checkpoint = torch.load(model_path / args.continue_from, map_location=DEVICE)
-        state_dict = checkpoint["model_state_dict"]
-        state_dict = {k.replace("_orig_mod.", ""): v for k, v in state_dict.items()}  # Remove "_orig_mod." prefix from keys
-        model.load_state_dict(state_dict, strict=True)
+        model.load_state_dict(checkpoint["model_state_dict"], strict=True)
         optim.load_state_dict(checkpoint["optimizer_state_dict"])
         for param_group in optim.param_groups: param_group["lr"] = get_lr(CURRENT_STEP)
         wandb.init(project=config["wandb_project"], id=checkpoint["wandb_id"], resume="must")
