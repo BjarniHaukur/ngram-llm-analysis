@@ -15,7 +15,9 @@ from torch.utils.data import random_split, DataLoader
 from transformers import GPT2Config, GPT2LMHeadModel, LlamaConfig, LlamaForCausalLM
 
 from utils.dataset import MemmapDataset
-from utils.tokenizer import load_tokenizer
+from utils.tokenizer import load_tokenizer, color_text_html
+from utils.sample import stream_generation
+
 
 torch.random.manual_seed(1337)
 if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
@@ -75,7 +77,7 @@ def main(args):
     CURRENT_STEP = 0
     STEPS_PER_EPOCH_TRAIN = len(train_ds) // args.batch_size  # Drop last is True
     TOTAL_STEPS = STEPS_PER_EPOCH_TRAIN * args.epochs
-    VAL_INTERVAL = STEPS_PER_EPOCH_TRAIN // 100
+    VAL_INTERVAL = STEPS_PER_EPOCH_TRAIN // 10
     NUM_VAL_STEPS = STEPS_PER_EPOCH_TRAIN // VAL_INTERVAL
     WARMUP_STEPS = int(0.03 * TOTAL_STEPS)
 
@@ -137,7 +139,6 @@ def main(args):
     
     model.train()
 
-    # TODO: smoothed loss
     train_loss = float("inf")
     val_loss = float("inf")
 
@@ -174,7 +175,7 @@ def main(args):
             with torch.no_grad():
                 total_val_loss = 0
                 total_val_perplexity = 0
-                for _ in range(NUM_VAL_STEPS):
+                for val_step in range(NUM_VAL_STEPS):
                     val_batch = next(val_dl).to(DEVICE, non_blocking=True)
                     x_val = val_batch[..., :-1]
                     y_val = val_batch[..., 1:]
@@ -189,7 +190,13 @@ def main(args):
                     total_val_loss += val_loss
                     total_val_perplexity += perplexity
                     step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
-                    
+
+                    if val_step > 0: continue  # this is getting too nested
+
+                    prompt = "\"\"Once upon "
+                    continuation = "".join(list(stream_generation(model, tokenizer, prompt=prompt, max_length=50, temperature=0.7)))
+                    wandb.log({"generated_text": wandb.Html(color_text_html(tokenizer, prompt + continuation))}, step=step)
+                                
                 wandb.log({
                     "val_loss": total_val_loss / NUM_VAL_STEPS,
                     "val_perplexity": total_val_perplexity / NUM_VAL_STEPS
@@ -198,7 +205,7 @@ def main(args):
             step_tqdm.set_description("Training...")
 
 
-        if step % CHECKPOINT_INTERVAL == 0:
+        if step % CHECKPOINT_INTERVAL == 0 and step != 0:
             torch.save({
                 "current_step": step,
                 "model_state_dict": model.state_dict(),

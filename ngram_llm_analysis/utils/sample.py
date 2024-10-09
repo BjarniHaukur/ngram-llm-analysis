@@ -1,3 +1,5 @@
+from typing import Iterator
+
 import torch
 import torch.nn.functional as F
 
@@ -34,4 +36,30 @@ def top_k_sample(logits:torch.Tensor, k:int=50)->torch.Tensor:
     top_probs /= top_probs.sum()
     sampled_index = torch.multinomial(top_probs, 1)
     return top_indices[sampled_index].squeeze(-1)
+
+@torch.no_grad()
+def stream_generation(model, tokenizer, prompt:str="", max_length:int=128, temperature:float=0.7)->Iterator[str]:
+    model.eval()
+    device = next(model.parameters()).device
+    
+    bos_token = tokenizer.token_to_id("<bos>")
+    input_ids = torch.tensor([bos_token] + tokenizer.encode(prompt, add_special_tokens=False).ids).unsqueeze(0).to(device)
+    
+    generated = []
+    for _ in range(max_length):
+        outputs = model(input_ids)
+        next_token_logits = outputs.logits[:, -1, :]
+        # next_token = nucleus_sample(next_token_logits, 0.5)
+        next_token = sample_with_temp(next_token_logits, temperature)
+        
+        generated.append(next_token.item())
+        input_ids = torch.cat([input_ids, next_token.unsqueeze(0)], dim=-1)
+        
+        # Check for end-of-sequence token
+        if next_token.item() == tokenizer.token_to_id("<eos>"):
+            break
+    
+        yield tokenizer.decode(next_token.tolist())
+    
+    model.train()
 
