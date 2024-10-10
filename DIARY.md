@@ -39,8 +39,52 @@ Project Manager: Bjarni
 - **Group Chat**: We decided to be more active in the group chat.
 
 ### Supervisor Meeting
-- Scheduled for this Thursday 3pm
-  
+
+#### 1. **Comparison with the Other Group**
+   - **Approach**: 
+     - Vast differences in approach between our group and the other group.
+     - Our group focuses on optimization for both the LLM and the n-gram, while the other group uses an SQL database.
+     - We designed our program to rely on keeping everything in memory, which contrasts with the other group's database reliance.
+   - **Bottleneck**:
+     - RAM is the primary bottleneck (64GB is currently sufficient for 80% of the Tiny Stories dataset).
+     - We suggested increasing the memory to 128GB since the entire dataset would require 70GB.
+#### 2. **Training and Optimizations**
+   - **Training Time**:
+     - The other group takes 10 days for 5 epochs of training, while we complete it in 11 hours.
+   - **GPU Utilization**:
+     - We discussed the optimizations we implemented to ensure optimal GPU utilization.
+     - We conducted two training runs: the first crashed, but the second was successful, leading us to suspect an issue with the KTH cluster.
+   - **Tokenization**:
+     - Bjarne explained the issues encountered while not using pre-tokenization.
+   - **Iterative Training**:
+     - We train and validate on 1/100 of the epoch iteratively, and this idea was discussed with Johan.
+   - **Model Evolution**:
+     - We demonstrated how the model evolved during training, using a log file to track how tokenization changed over time.
+#### 3. **Demonstrations**
+   - **Live Demo**:
+     - We gave Johan a live demo of the transformer in a Jupyter Notebook, using different examples to show the model’s behavior.
+   - **Utils Folder**:
+     - We suggested that Johan review the utils folder, as it contains the optimizations we implemented.
+#### 4. **N-gram Implementation**
+   - **Completion**:
+     - Boti finished the n-gram implementation and optimized the marginalization process, ensuring redundancy is minimized.
+   - **Next Steps**:
+     - Debug the n-gram tree and implement Kneser-Ney smoothing, which Johan confirmed as state-of-the-art.
+     - Consider using two servers—one for n-gram operations and one for training. 
+#### 5. **Technical Adjustments**
+   - **Cluster Modifications**:
+     - We discussed modifying the KTH cluster setup:
+       - **Option A**: Everything remains in the same pod, but we double the available RAM.
+       - **Option B**: Add a second pod in the same network, using a socket to connect the GPU cluster to the new n-gram pod.
+     - If these options aren't feasible, we suggested using only 70% of the Tiny Stories dataset.
+   - **Memory Request**:
+     - Johan agreed to email the system administrator immediately after the meeting to request additional memory.
+   - **Parameter Limitations**:
+     - Bjarni raised the question of how far we can push the current parameter limit of 140 million, given the resources at our disposal.
+#### 6. **Dataset Considerations**
+   - **Tiny Stories**:
+     - We discussed moving on to another dataset, as Tiny Stories does not generate the most interesting results.
+       
 ---
 
 ## Week 40 (30.09.2024 - 06.10.2024)
