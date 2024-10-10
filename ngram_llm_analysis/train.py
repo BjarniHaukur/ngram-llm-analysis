@@ -191,7 +191,7 @@ def main(args):
             step_tqdm.set_description("Training...")
 
 
-        if step % CHECKPOINT_INTERVAL == 0 and step != 0:
+        if (step % CHECKPOINT_INTERVAL == 0 or step == TOTAL_STEPS - 1) and step != 0:
             torch.save({
                 "current_step": step,
                 "model_state_dict": model.state_dict(),

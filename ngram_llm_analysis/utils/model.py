@@ -1,5 +1,3 @@
-import yaml
-import torch
 import torch.nn as nn
 from transformers import GPT2Config, GPT2LMHeadModel, LlamaConfig, LlamaForCausalLM
 
