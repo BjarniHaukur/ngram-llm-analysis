@@ -64,26 +64,21 @@ def html_color(rgb:Tuple[int,int,int]) -> str:
 def color_text_ansi(tokenizer:Tokenizer, text:str) -> str:
     encoding = tokenizer.encode(text)
     colored = ""
-    for i, (token_id, word_id) in enumerate(zip(encoding.ids, encoding.word_ids)):
+    for i, token_id in enumerate(encoding.ids):
         token = tokenizer.decode([token_id])
-        if word_id is not None:
-            color = COLORS[word_id % len(COLORS)]
-            colored += ansi_color(color) + token + RESET_BG
-        else:
-            colored += token
+        color = COLORS[i % len(COLORS)]
+        colored += ansi_color(color) + token + RESET_BG
+
     return colored
 
 def color_text_html(tokenizer:Tokenizer, text:str) -> str:
     encoding = tokenizer.encode(text)
     colored = ""
-    for i, (token_id, word_id) in enumerate(zip(encoding.ids, encoding.word_ids)):
+    for i, token_id in enumerate(encoding.ids):
         token = tokenizer.decode([token_id])
-        if word_id is not None:
-            color = COLORS[word_id % len(COLORS)]
-            token_text = token.replace("\n", "<br>").replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
-            colored += f'<span {html_color(color)}>{token_text}</span>'
-        else:
-            colored += token
+        color = COLORS[i % len(COLORS)]
+        token_text = token.replace("\n", "<br>").replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+        colored += f'<span {html_color(color)}>{token_text}</span>'
     return colored
 
 def build_tokenizer(data_name:str, name:str = "tokenizer", vocab_size:int = 8096, chunk_size:int = 1024**2):
