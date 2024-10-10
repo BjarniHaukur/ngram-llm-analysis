@@ -63,7 +63,7 @@ def main(args):
     CURRENT_STEP = 0
     STEPS_PER_EPOCH_TRAIN = len(train_ds) // args.batch_size  # Drop last is True
     TOTAL_STEPS = STEPS_PER_EPOCH_TRAIN * args.epochs
-    VAL_INTERVAL = STEPS_PER_EPOCH_TRAIN // 10
+    VAL_INTERVAL = STEPS_PER_EPOCH_TRAIN // 100
     NUM_VAL_STEPS = STEPS_PER_EPOCH_TRAIN // VAL_INTERVAL
     WARMUP_STEPS = int(0.03 * TOTAL_STEPS)
 
