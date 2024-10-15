@@ -1,5 +1,27 @@
 # Team Diary
 
+## Week 42 (14.10.2024 - 20.10.2024)
+Project Manager: Boti
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+
+### Peer Group Meeting
+- N/A (cancelled due to exam season)
+
+### Supervisor Meeting
+
+---
+
 ## Week 41 (07.10.2024 - 13.10.2024)
 Project Manager: Bjarni
 
@@ -18,7 +40,11 @@ Project Manager: Bjarni
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8h**
+- Conducted an **in-depth review of n-gram statistics**, analyzing key patterns and metrics for future experiments
+- **Summarized meetings** and structured previous work, ensuring the project’s progression remained clear and organized, while synthesizing important discussions for future reference.
+- **Authored the midterm report**, compiling critical findings and documenting the project’s current status, methodologies, and next steps, ensuring clarity and cohesion in communication.
+- **Prepared for upcoming meetings** by setting agendas, organizing to-dos, and facilitating smooth collaboration among team members, ensuring efficient task execution and goal alignment.
 
 ### Peer Group Meeting
 
