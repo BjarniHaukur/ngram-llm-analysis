@@ -1,6 +1,6 @@
 # Team Diary
 
-## Week 42 (14.10.2024 - 20.10.2024)
+## Week 43 (21.10.2024 - 27.10.2024)
 Project Manager: Boti
 
 ### Bjarni
@@ -13,13 +13,41 @@ Project Manager: Boti
 - **Number of hours this week: TBD**
 
 ### Felix
+- **Number of hours this week: 6h**
+- Worked on the report: wrote the introduction (context and objectives), problem description (overall scope of the project), and related work (summary and evaluation of relevant studies).
+- Revised Nguyen's cited literature for better alignment and accuracy.
+- Reviewed previously collected literature for additional insights - I used my notes to write the report in a detailed and sophiticated way
+- Searched for new publications to include the latest research
+
+### Peer Group Meeting
+- N/A (cancelled on request of peer group)
+
+### Supervisor Meeting
+
+---
+
+## Week 42 (14.10.2024 - 20.10.2024)
+Project Manager: XXX
+
+### Bjarni
 - **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: 0h**
+- No work performed due to exam season
 
 ### Peer Group Meeting
 - N/A (cancelled due to exam season)
 
 ### Supervisor Meeting
-
+- N/A (cancelled due to exam season)
+  
 ---
 
 ## Week 41 (07.10.2024 - 13.10.2024)
