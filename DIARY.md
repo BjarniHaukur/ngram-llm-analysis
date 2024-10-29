@@ -1,5 +1,31 @@
 # Team Diary
 
+## Week 44 (28.10.2024 - 03.11.2024)
+Project Manager: Felix
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+
+### Peer Group Meeting
+- The opponent group does not use smoothing, applying a specific rule (around 30 seconds for the rule).
+- They encountered issues with GPU instances, noting the need for a larger instance to handle their requirements. One training run takes approximately 24 hours.
+- The group is exploring the next steps, including conducting experiments with more complex datasets beyond TinyStories.
+- They discussed dataset variance and its potential implications on the overfitting criterion.
+- Clarification from Bjarni: The opponent group’s issue was related to GPU VRAM already being occupied on their instance, not a data loading problem.
+
+### Supervisor Meeting
+- Scheduled for Thursday 
+---
+
 ## Week 43 (21.10.2024 - 27.10.2024)
 Project Manager: Boti
 
