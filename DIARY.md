@@ -10,7 +10,8 @@ Project Manager: Felix
 - **Number of hours this week: TBD**
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 7h**
+- worked on top1 accuracy. Integrating the ngram and transformer predictions. Tried to understand what is sought after in terms of the metrics. Thoughts regarding what sentences/contexts should be given to the calculations. 
 
 ### Felix
 - **Number of hours this week: TBD**
@@ -36,7 +37,8 @@ Project Manager: Boti
 - **Number of hours this week: TBD**
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 4h**
+- Initialized ngram integration
 
 ### Felix
 - **Number of hours this week: 6h**
@@ -62,7 +64,8 @@ Project Manager: XXX
 - **Number of hours this week: TBD**
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 0h**
+- Exam week
 
 ### Felix
 - **Number of hours this week: 0h**
@@ -91,7 +94,8 @@ Project Manager: Bjarni
 - Benchmarking memory usage and speed
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 2h**
+- Midterm report improvement. Adding substance to the report by integrating Bjarni's valuable comments on Felix's draft.
 
 ### Felix
 - **Number of hours this week: 8h**
@@ -192,7 +196,8 @@ Project Manager: Jonas
 - Implemented Kneser-Ney smoothing
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 6h**
+- Setting up a server using Google Cloud. Struggled for some time to open up the firewall. Managed to do so after a while. 
 
 ### Felix
 - **Number of hours this week: 8h**
