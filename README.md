@@ -41,15 +41,22 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 cd into ngram_llm_analysis/
 
 ### Examples
-Training
 
-`python3 train.py --config llama_small --dataset small_train`
+Fit Tokenizer
+```bash
+python3 utils/tokenizer.py cleaned_train --name tokenizer_bytes --vocab_size 16384
+```
 
-Building a specific tokenizer
+Tokenize Data
+```bash
+python3 utils/dataset.py cleaned_train tokenizer_bytes
+```
 
-`python3 utils/tokenizer.py <dataset> --name <tokenizer_name>`
+Train Transformer
 
-Using the specialized tokenizer
-`python3 train.py --config llama_small --dataset small_train --tokenizer <tokenizer_name>`
+```bash
+python3 train.py --config llama_small --dataset small_train
+```
+
 
 
