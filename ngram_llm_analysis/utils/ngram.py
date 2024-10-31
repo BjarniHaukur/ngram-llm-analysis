@@ -92,10 +92,16 @@ if __name__ == "__main__":
     ds = MemmapDataset(args.dataset_file, args.tokenizer_name, num_tokens=int(1e32)) # i.e. just read all the tokens
     tokens = ds[0].tolist()
     
-    trie = PySmoothedTrie(n_gram_max_length=7)
+    print(f"Instantiating trie")
+    trie = PySmoothedTrie(n_gram_max_length=7, root_capacity=None)
+    
+    print(f"Fitting trie")
     trie.fit(tokens, n_gram_max_length=7, root_capacity=max(tokens)+1)
+    
     print(f"Saving trie to {CHECKPOINT_PATH / args.ngram_file}")
     trie.save(str(CHECKPOINT_PATH / args.ngram_file))
+    
+    print(trie.get_prediction_probabilities([1]))
     
   
   
