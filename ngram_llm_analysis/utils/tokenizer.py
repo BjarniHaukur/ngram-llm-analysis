@@ -8,7 +8,7 @@ from tokenizers.trainers import BpeTrainer
 from tokenizers.pre_tokenizers import ByteLevel, Whitespace
 from tokenizers.decoders import ByteLevel as ByteLevelDecoder
 
-CHECKPOINT_PATH = Path("../checkpoints/tokenizer/")
+CHECKPOINT_PATH = Path(__file__).parent.parent.parent / "checkpoints" / "tokenizer"
 
 BOS, BOS_ID = "<bos>", 0
 EOS, EOS_ID = "<eos>", 1

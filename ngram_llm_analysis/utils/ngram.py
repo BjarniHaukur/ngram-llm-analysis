@@ -51,7 +51,7 @@ class NGramTrie:  # wrapping the ngram-trie crate
         def variation_distance(i):
             filtered_probs = [{r: p for r, p in rule_dict.items() if len(r) <= i} for rule_dict in probs]
             smallest_variational_distances = [
-                np.min([np.abs(p - model_p).sum() for p in rule_dict.values()])
+                np.min([np.abs(p - model_p).sum() for p in rule_dict.values()])  # abs shouldnt be needed (probabilities are non-negative)
                 for rule_dict in filtered_probs
             ]
             return np.mean(smallest_variational_distances)
@@ -65,25 +65,26 @@ class NGramTrie:  # wrapping the ngram-trie crate
         self.trie.set_all_ruleset_by_length(self.max_ngram_length-1)  # -1 for context
         return self.calculate_metrics(texts, model_p, "all")
 
-    def subgram_metrics(self, texts:list[str], logits:torch.Tensor):
+    def subgram_metrics(self, texts:list[str], model_p:np.ndarray):
         self.trie.set_subgram_ruleset_by_length(self.max_ngram_length-1)
-        return self.calculate_metrics(texts, logits, "subgram")
+        return self.calculate_metrics(texts, model_p, "subgram")
     
-    def suffix_metrics(self, texts:list[str], logits:torch.Tensor)->dict:
+    def suffix_metrics(self, texts:list[str], model_p:np.ndarray)->dict:
         self.trie.set_suffix_ruleset_by_length(self.max_ngram_length-1)
-        return self.calculate_metrics(texts, logits, "suffix")
+        return self.calculate_metrics(texts, model_p, "suffix")
     
-    def backoff_metrics(self, texts:list[str], logits:torch.Tensor)->dict:
+    def backoff_metrics(self, texts:list[str], model_p:np.ndarray)->dict:
         self.trie.set_backoff_ruleset_by_length(self.max_ngram_length-1)
-        return self.calculate_metrics(texts, logits, "backoff")
+        return self.calculate_metrics(texts, model_p, "backoff")
+    
   
 if __name__ == "__main__":
     from argparse import ArgumentParser
     
     parser = ArgumentParser()
     parser.add_argument("dataset_file", type=str)
-    parser.add_argument("tokenizer_name", type=str)
-    parser.add_argument("ngram_file", type=str)
+    parser.add_argument("--tokenizer_name", type=str, default="tokenizer")
+    parser.add_argument("--ngram_file", type=str, default="ngram")
     
     args = parser.parse_args()
     
@@ -100,105 +101,3 @@ if __name__ == "__main__":
     
     print(f"Saving trie to {CHECKPOINT_PATH / args.ngram_file}")
     trie.save(str(CHECKPOINT_PATH / args.ngram_file))
-    
-    print(trie.get_prediction_probabilities([1]))
-    
-  
-  
-  
-  
-  
-  
-  
-  
-  
-        
-#     def top1_accuracy(self, text, rules, model):
-#         '''return {rule: {n_gram: prob, transformer: prob}}'''
-        
-#         self.trie.set_rule_set(rules)
-
-#         self.trie.fit_smoothing()
-        
-#         bos_token = tok.token_to_id("<bos>")
-#         input_ids = [bos_token] + tok.encode(text, add_special_tokens=False).ids
-        
-#         n_gram_probs = self.trie.get_prediction_probabilities(input_ids)
-        
-#         rule_to_ngram_probs = formatted_ngram_probs(n_gram_probs)
-
-#         top1_accuracy = {}
-        
-#         for rule in rules:
-#             top1_match = 0
-#             import torch.nn.functional as F
-#             logits = model_logits(input_ids, model, rule)
-#             p = F.softmax(logits, dim=-1)
-#             top_probs, top_indices = torch.topk(p, k=1)
-                        
-#             # if predicting the same token as the ngram model, increment top1_match
-#             ngram_token = rule_to_ngram_probs[rule][0][0]
-#             model_token = top_indices[0].item()
-            
-#             top1_match += ngram_token == model_token
-            
-#             top1_accuracy[rule] = {"ngram": {"token": ngram_token, "prob": rule_to_ngram_probs[rule][0][1]}, "model": {"token": model_token, "prob": top_probs[0].item()}, "match": ngram_token == model_token}
-        
-#         matches = sum(top1_accuracy[rule]["match"] for rule in rules)
-#         top1_accuracy["accuracy"] = matches / len(rules)
-        
-#         return top1_accuracy
-            
-# if __name__ == "__main__":
-#     from itertools import product
-
-#     import yaml
-    
-#     from train import model_from_config
-#     from utils.tokenizer import load_tokenizer
-        
-#     from utils.dataset import MemmapDataset
-#     from utils.tokenizer import load_tokenizer
-#     from torch.utils.data import random_split
-
-#     device = "cuda" if torch.cuda.is_available() else "cpu"
-
-#     tok = load_tokenizer("tokenizer_bytes")
-
-#     with open("../data/small_train.txt", "r") as f:
-#         f.readline() # the first line is just "text"
-#         data = f.read()
-        
-#     with open("../configs/llama_medium.yaml", "r") as f:
-#         config = yaml.safe_load(f)
-        
-#     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-#     model = model_from_config(config).to(DEVICE)
-
-#     tok = load_tokenizer("tokenizer_bytes")
-#     tok.pad_token = tok.token_to_id("<pad>")
-#     full_ds = MemmapDataset(dataset_file="small_train", tokenizer_name='tokenizer_bytes', num_tokens=2048 - 1)
-
-#     train_size = int(0.8 * len(full_ds))
-#     val_size = int(0.1 * len(full_ds))
-#     test_size = len(full_ds) - train_size - val_size
-#     train_ds, val_ds, _ = random_split(full_ds, [train_size, val_size, test_size])
-
-#     tokenized_data = []
-
-#     for batch in train_ds:
-#         tokenized_data.extend(batch.tolist())
-        
-#     ns = NgramStats(tokenized_data)
-        
-#     #symbols = ['-', '+', '*'] # TODO: add support for marginalization
-#     symbols = ['-', '+']
-#     rules = []
-
-#     for length in range(1, 7):
-#         rules.extend([''.join(p) for p in product(symbols, repeat=length)])
-        
-#     prompt = "time. in a big"
-#     top1 = ns.top1_accuracy(prompt, rules, model)
-#     print(top1)

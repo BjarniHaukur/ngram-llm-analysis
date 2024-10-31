@@ -10,7 +10,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-DATA_PATH = Path("../data/")
+DATA_PATH = Path(__file__).parent.parent.parent / "data"
 
 
 class MemmapDataset(Dataset):
