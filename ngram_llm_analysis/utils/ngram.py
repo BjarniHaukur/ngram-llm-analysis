@@ -1,253 +1,198 @@
-import json
 from pathlib import Path
-from functools import lru_cache
 
-CHECKPOINT_PATH = Path("../checkpoints/ngram/")
+import torch
+import numpy as np
+from ngram_trie import PySmoothedTrie
+
+try: from .dataset import MemmapDataset
+except ImportError: from dataset import MemmapDataset
+
+CHECKPOINT_PATH = Path(__file__).parent.parent.parent / "checkpoints" / "ngram/"
 CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
 
-class TrieNode:
-    __slots__ = ('children', 'count')
+def formatted_ngram_probs(token_probs:list[tuple[int, list[tuple[str, float]]]])->dict[str, np.ndarray]:
+    rule_to_probs = {}
     
-    def __init__(self):
-        self.children:dict[int, TrieNode] = {} 
-        self.count:int = 0  # Count of N-grams ending at this node
+    for token_idx, rule_probs in token_probs:
+        for rule, prob in rule_probs:
+            rule_to_probs[rule] = rule_to_probs.get(rule, np.zeros(len(token_probs)))
+            rule_to_probs[rule][token_idx] = prob
+            
+    return rule_to_probs
 
-    def to_dict(self):
+class NGramTrie:  # wrapping the ngram-trie crate
+    def __init__(self, ngram_file:str, max_ngram_length:int=7):
+        self.trie = PySmoothedTrie.load(CHECKPOINT_PATH / ngram_file)
+        self.max_ngram_length = max_ngram_length
+        
+    def run_all_metrics(self, text, logits):
         return {
-            'children': {k: v.to_dict() for k, v in self.children.items()},
-            'count': self.count
+            **self.all_metrics(text, logits), # important to do this first for caching reasons
+            **self.subgram_metrics(text, logits),
+            **self.suffix_metrics(text, logits),
+            # **self.backoff_metrics(text, logits),
+            # ... heatmaps, tables, etc.
         }
-
-    @classmethod
-    def from_dict(cls, data):
-        node = cls()
-        node.children = {k: cls.from_dict(v) for k, v in data['children'].items()}
-        node.count = data['count']
-        return node
-
-class NGramTrie:
-    """ A trie for storing N-grams of tokenized text. """
-    def __init__(self, ngram_max_length:int):
-        self.root = TrieNode()
-        self.ngram_max_length = ngram_max_length  # not used
     
-    def save(self, filename:str):
-        filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
-        with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump({
-                'ngram_max_length': self.ngram_max_length,
-                'root': self.root.to_dict()
-            }, f, indent=2)
-    
-    @classmethod
-    def load(cls, filename:str):
-        filepath = CHECKPOINT_PATH / (filename if filename.endswith(".json") else filename + ".json")
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        trie = cls(data['ngram_max_length'])
-        trie.root = TrieNode.from_dict(data['root'])
-        return trie
-    
-    @classmethod
-    def fit(cls, tokens:list[int], ngram_max_length:int):
-        trie = cls(ngram_max_length)
-        for i in range(len(tokens) - ngram_max_length + 1): # sliding window over tokens
-            ngram = tokens[i:i+ngram_max_length]
-            trie.insert(ngram)
-        return trie
-    
-    def insert(self, ngram):
-        assert len(ngram) == self.ngram_max_length, "N-gram length must be equal to the maximum length"
-        node = self.root
-        for token in ngram:
-            node.children[token] = node.children.get(token, TrieNode()) # get or create the node
-            node = node.children[token] # move to the next node
-            node.count += 1 # increment the count
+    def calculate_metrics(self, texts:list[str], model_p:np.ndarray, name:str):
+        """Metrics regarding all possible ngram rules, for the currently selected rule set"""
+                
+        probs = [self.trie.get_smoothed_probabilities(text) for text in texts]
+        probs = [formatted_ngram_probs(p) for p in probs]
         
-    def find_all_nodes(self, tokens:list[int], rule_context:str|None=None)->list[TrieNode]:
-        def recursive_search(node:TrieNode, rule_context:str, index:int)->list[TrieNode]:
-            if index == len(rule_context): return [node]  # reached the end of the rule context, return this node
-
-            if (token:= rule_context[index]) == '*':
-                results = []
-                for child_node in node.children.values(): # try out all wildcards
-                    results.extend(recursive_search(child_node, rule_context, index + 1))
-                return results
-            elif token in node.children:
-                return recursive_search(node.children[token], rule_context, index + 1)
-            else:  # not found 
-                return []
-
-        search_context = self._preprocess_rule_context(tokens, rule_context)
-        return recursive_search(self.root, search_context, 0)
-    
-    def _preprocess_rule_context(self, tokens:list[int], rule_context:str|None)->str:
-        if rule_context is None: return tokens
-        assert len(tokens) == len(rule_context), "Tokens and rule context must be of the same length"
-        return ["*" if rule == "*" else token for token, rule in zip(tokens, rule_context) if rule != "-"]
-    
-    def search(self, tokens:list[int], rule_context:str|None=None)->int:
-        """
-        Search the trie using tokens and rule context. '-' shortens context, '*' is wildcard and '+' is the keep.
-        
-        Example:
-            search([1,2,3], "*-+") searches anything (*) followed by 3
+        def top_1(i):
+            filtered_probs = [{r: p for r, p in rule_dict.items() if len(r) <= i} for rule_dict in probs]
+            has_argmax_match = [
+                np.any([np.argmax(model_p) == np.argmax(p) for p in rule_dict.values()])
+                for rule_dict in filtered_probs
+            ]
+            return np.mean(has_argmax_match)
             
-            search([1,2,3], "--*") searches for all ngrams of length 1
-            
-            search([1,2,3], None) is equivalent to search([1,2,3], "+++"), i.e. search for this exact ngram
-        """
-        def _search(search_context:str, node:TrieNode=None, index:int=0)->int:
-            node = node or self.root  # start at root unless specified
-
-            if index == len(search_context): return node.count  # Reached the end of the rule context
-
-            total_count = 0
-            
-            if (token:= search_context[index]) == '*':  # explore all child nodes at this position
-                total_count += sum(_search(search_context, child_node, index + 1) for child_node in node.children.values())
-            elif token in node.children:  # continue search
-                total_count += _search(search_context, node.children[token], index + 1)
-            else:  # not found
-                return 0
-
-            return total_count
+        def variation_distance(i):
+            filtered_probs = [{r: p for r, p in rule_dict.items() if len(r) <= i} for rule_dict in probs]
+            smallest_variational_distances = [
+                np.min([np.abs(p - model_p).sum() for p in rule_dict.values()])
+                for rule_dict in filtered_probs
+            ]
+            return np.mean(smallest_variational_distances)
         
-        search_context = self._preprocess_rule_context(tokens, rule_context)
-        return _search(search_context)
-    
-    def unique_successor_count(self, context:list[int], context_rule:str|None=None)->int:
-        unique_successors = set()
-        for node in self.find_all_nodes(context, context_rule):
-            unique_successors.update(node.children.keys())
-        return len(unique_successors)
-    
-    def continuation_count(self, token: int) -> int:
-        """Count the number of unique contexts that precede the given token."""
-        unique_contexts = set()
-        stack = [(self.root, [])]
-        while stack:
-            current_node, context = stack.pop()
-            for child_token, child_node in current_node.children.items():
-                new_context = context + [child_token]
-                if child_token == token and context:
-                    unique_contexts.add(tuple(context))
-                stack.append((child_node, new_context))
-        return len(unique_contexts)
-    
-    def total_unique_contexts(self, n:int)->int:
-        """Compute the total number of unique (n-1)-gram contexts."""
-        count = 0
-        stack = [(self.root, [])]  # Stack holds (current_node, path)
+        return {
+            **{f"top_1/{name}_{i}": top_1(i) for i in range(1, self.max_ngram_length)},
+            **{f"variation_distance/{name}_{i}": variation_distance(i) for i in range(1, self.max_ngram_length)}
+        }
         
-        while stack:
-            current_node, path = stack.pop()
+    def all_metrics(self, texts:list[str], model_p:np.ndarray):
+        self.trie.set_all_ruleset_by_length(self.max_ngram_length-1)  # -1 for context
+        return self.calculate_metrics(texts, model_p, "all")
 
-            if len(path) == n - 1:  # We only count paths of length (n-1)
-                count += 1
-                continue  # no need to go deeper for this path
-
-            # then the path is shorter so we continue exploring
-            for child_token, child_node in current_node.children.items():
-                stack.append((child_node, path + [child_token]))
-        
-        return count
+    def subgram_metrics(self, texts:list[str], logits:torch.Tensor):
+        self.trie.set_subgram_ruleset_by_length(self.max_ngram_length-1)
+        return self.calculate_metrics(texts, logits, "subgram")
     
-    @lru_cache(maxsize=None)
-    def kneser_ney_smoothed_ratios(self, tokens:list[int], rule_context:str, discount:float=0.75)->list[float]:
-        """Compute Kneser-Ney smoothed probability ratios for the given tokens and rule context."""
-        ratios = []
-        total_continuation = self.total_unique_contexts(len(tokens))
-
-        for i in range(len(tokens)):
-            context = tokens[:i]
-            context_rule = rule_context[:i]
-            token = tokens[i]
-
-            ngram_count = self.search(context + [token], context_rule + "+")
-            context_count = self.search(context, context_rule)
-            unique_successors = self.unique_successor_count(context, context_rule)
-            continuation_count = self.continuation_count(token)
-
-            if context_count > 0:
-                discounted_prob = max(ngram_count - discount, 0) / context_count
-                lambda_factor = (discount * unique_successors) / context_count
-                backoff_prob = continuation_count / total_continuation
-                kn_prob = discounted_prob + lambda_factor * backoff_prob
-                ratios.append(kn_prob)
-            else:
-                backoff_prob = continuation_count / total_continuation
-                ratios.append(backoff_prob)
-
-        return ratios
+    def suffix_metrics(self, texts:list[str], logits:torch.Tensor)->dict:
+        self.trie.set_suffix_ruleset_by_length(self.max_ngram_length-1)
+        return self.calculate_metrics(texts, logits, "suffix")
     
-    def predict_next_token(self, context:list[int], rule_context:str|None=None)->int:
-        """Predict the next token in the sequence using Kneser-Ney smoothed probabilities."""
-        rule_context = rule_context or "+" * len(context)
-        ratios = self.kneser_ney_smoothed_ratios(context, rule_context)
-        max_ratio = max(ratios)
-        return ratios.index(max_ratio)
-        
-            
+    def backoff_metrics(self, texts:list[str], logits:torch.Tensor)->dict:
+        self.trie.set_backoff_ruleset_by_length(self.max_ngram_length-1)
+        return self.calculate_metrics(texts, logits, "backoff")
+  
 if __name__ == "__main__":
-    trie = NGramTrie(ngram_max_length=3)
-    trie.insert([1, 2, 3])
-    trie.insert([1, 2, 3])
-    trie.insert([1, 2, 4])
-    trie.insert([2, 3, 4])
-    trie.insert([3, 4, 5])
+    from argparse import ArgumentParser
+    
+    parser = ArgumentParser()
+    parser.add_argument("dataset_file", type=str)
+    parser.add_argument("tokenizer_name", type=str)
+    parser.add_argument("ngram_file", type=str)
+    
+    args = parser.parse_args()
+    
+    print(f"Building trie for {args.dataset_file} with tokenizer {args.tokenizer_name} and saving to {args.ngram_file}")
+    
+    ds = MemmapDataset(args.dataset_file, args.tokenizer_name, num_tokens=int(1e32)) # i.e. just read all the tokens
+    tokens = ds[0].tolist()
+    
+    trie = PySmoothedTrie(n_gram_max_length=7)
+    trie.fit(tokens, n_gram_max_length=7, root_capacity=max(tokens)+1)
+    print(f"Saving trie to {CHECKPOINT_PATH / args.ngram_file}")
+    trie.save(str(CHECKPOINT_PATH / args.ngram_file))
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+        
+#     def top1_accuracy(self, text, rules, model):
+#         '''return {rule: {n_gram: prob, transformer: prob}}'''
+        
+#         self.trie.set_rule_set(rules)
 
-    # Test insertion and counts
-    count = trie.search([1, 2, 3], "+++")
-    assert count == 2, f"Test failed: Incorrect count for [1, 2, 3], expected 2 got {count}"
-    count = trie.search([1, 2, 4], "+++")
-    assert count == 1, f"Test failed: Incorrect count for [1, 2, 4], expected 1 got {count}"
+#         self.trie.fit_smoothing()
+        
+#         bos_token = tok.token_to_id("<bos>")
+#         input_ids = [bos_token] + tok.encode(text, add_special_tokens=False).ids
+        
+#         n_gram_probs = self.trie.get_prediction_probabilities(input_ids)
+        
+#         rule_to_ngram_probs = formatted_ngram_probs(n_gram_probs)
 
-    # Test search with rule context
-    count = trie.search([1, 2, 3], "*++")
-    assert count == 2, f"Test failed: Incorrect count for '* 2 3', expected 2 got {count}"
-    count = trie.search([1, 2, 3], "+*+")
-    assert count == 2, f"Test failed: Incorrect count for '1 * 3', expected 2 got {count}"
-    count = trie.search([1, 2, 3], "++*")
-    assert count == 3, f"Test failed: Incorrect count for '1 2 *', expected 3 got {count}"
-    count = trie.search([1, 2, 3], "**+")
-    assert count == 2, f"Test failed: Incorrect count for '* * 3', expected 2 got {count}"
+#         top1_accuracy = {}
+        
+#         for rule in rules:
+#             top1_match = 0
+#             import torch.nn.functional as F
+#             logits = model_logits(input_ids, model, rule)
+#             p = F.softmax(logits, dim=-1)
+#             top_probs, top_indices = torch.topk(p, k=1)
+                        
+#             # if predicting the same token as the ngram model, increment top1_match
+#             ngram_token = rule_to_ngram_probs[rule][0][0]
+#             model_token = top_indices[0].item()
+            
+#             top1_match += ngram_token == model_token
+            
+#             top1_accuracy[rule] = {"ngram": {"token": ngram_token, "prob": rule_to_ngram_probs[rule][0][1]}, "model": {"token": model_token, "prob": top_probs[0].item()}, "match": ngram_token == model_token}
+        
+#         matches = sum(top1_accuracy[rule]["match"] for rule in rules)
+#         top1_accuracy["accuracy"] = matches / len(rules)
+        
+#         return top1_accuracy
+            
+# if __name__ == "__main__":
+#     from itertools import product
 
-    # Test different context lengths
-    count = trie.search([1, 2, 3], "-++")
-    assert count == 1, f"Test failed: Incorrect count for context '-++', expected 2 got {count}"
-    count = trie.search([1, 2, 3], "--+")
-    assert count == 1, f"Test failed: Incorrect count for context '--+', expected 2 got {count}"
+#     import yaml
+    
+#     from train import model_from_config
+#     from utils.tokenizer import load_tokenizer
+        
+#     from utils.dataset import MemmapDataset
+#     from utils.tokenizer import load_tokenizer
+#     from torch.utils.data import random_split
 
-    # Test edge cases
-    empty_trie = NGramTrie(ngram_max_length=3)
-    count = empty_trie.search([1, 2, 3], "+++")
-    assert count == 0, f"Test failed: Empty trie should return 0, got {count}"
-    count = trie.search([9, 9, 9], "+++")
-    assert count == 0, f"Test failed: Non-existent n-gram should return 0, got {count}"
+#     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    # Test unique_successor_count
-    unique_successors = trie.unique_successor_count([1, 2], "++")
-    assert unique_successors == 2, f"Test failed: Expected 2 unique successors for context [1, 2], got {unique_successors}"
+#     tok = load_tokenizer("tokenizer_bytes")
 
-    # Test total_unique_contexts
-    total_contexts = trie.total_unique_contexts(3)
-    assert total_contexts == 3, f"Test failed: Expected 3 total unique contexts of length 2, got {total_contexts}"
+#     with open("../data/small_train.txt", "r") as f:
+#         f.readline() # the first line is just "text"
+#         data = f.read()
+        
+#     with open("../configs/llama_medium.yaml", "r") as f:
+#         config = yaml.safe_load(f)
+        
+#     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-    # Test corrected continuation_count
-    continuation_count_3 = trie.continuation_count(3)
-    assert continuation_count_3 == 2, f"Test failed: Expected 2 unique contexts preceding token 3, got {continuation_count_3}"
+#     model = model_from_config(config).to(DEVICE)
 
-    # Test kneser_ney_smoothed_ratios
-    tokens = [1, 2, 3]
+#     tok = load_tokenizer("tokenizer_bytes")
+#     tok.pad_token = tok.token_to_id("<pad>")
+#     full_ds = MemmapDataset(dataset_file="small_train", tokenizer_name='tokenizer_bytes', num_tokens=2048 - 1)
 
-    kn_ratios = trie.kneser_ney_smoothed_ratios(tokens, rule_context, discount=0.75)
+#     train_size = int(0.8 * len(full_ds))
+#     val_size = int(0.1 * len(full_ds))
+#     test_size = len(full_ds) - train_size - val_size
+#     train_ds, val_ds, _ = random_split(full_ds, [train_size, val_size, test_size])
 
-    # Expected Kneser-Ney probability for the last token
-    expected_kn_prob = 0.75  # Calculated based on earlier verification
+#     tokenized_data = []
 
-    # Since kn_ratios is a list of probabilities for each token, we check the last one
-    last_kn_prob = kn_ratios[-1]
-    assert abs(last_kn_prob - expected_kn_prob) < 1e-5, f"Test failed: Expected KN probability {expected_kn_prob}, got {last_kn_prob}"
+#     for batch in train_ds:
+#         tokenized_data.extend(batch.tolist())
+        
+#     ns = NgramStats(tokenized_data)
+        
+#     #symbols = ['-', '+', '*'] # TODO: add support for marginalization
+#     symbols = ['-', '+']
+#     rules = []
 
-    print("All tests passed successfully.")
+#     for length in range(1, 7):
+#         rules.extend([''.join(p) for p in product(symbols, repeat=length)])
+        
+#     prompt = "time. in a big"
+#     top1 = ns.top1_accuracy(prompt, rules, model)
+#     print(top1)
