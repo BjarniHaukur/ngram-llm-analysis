@@ -5,6 +5,10 @@ Project Manager: Felix
 
 ### Bjarni
 - **Number of hours this week: TBD**
+- Met with Felix and Boti, did some work on the ngram statistics
+- Debugging the ngram trie implementation
+- Calculating the metrics for the ngram trie
+- Do so in a separate process, so it doesn't block the training loop
 
 ### Boti
 - **Number of hours this week: 8+**
@@ -70,7 +74,8 @@ Project Manager: Felix
 Project Manager: Boti
 
 ### Bjarni
-- **Number of hours this week: TBD**
+- **Number of hours this week: 0**
+- Focused on master's thesis applications
 
 ### Boti
 - **Number of hours this week: 40+**
@@ -136,7 +141,9 @@ Project Manager: XXX
 Project Manager: Bjarni
 
 ### Bjarni
-- **Number of hours this week: TBD**
+- **Number of hours this week: 1**
+- Midterm week, little to no work
+- Wrote some comments on our midterm report
 
 ### Boti
 - **Number of hours this week: 20**
