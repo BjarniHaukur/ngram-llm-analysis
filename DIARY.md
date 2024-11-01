@@ -24,8 +24,6 @@ Project Manager: Felix
 - Clarification from Bjarni: The opponent group’s issue was related to GPU VRAM already being occupied on their instance, not a data loading problem.
 
 ### Supervisor Meeting
-Here’s a structured version of your meeting notes, organized by topic:
-
 #### Server Usage
 - **Server Utilization**: The team has successfully utilized the server without issues.
 
