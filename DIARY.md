@@ -24,7 +24,42 @@ Project Manager: Felix
 - Clarification from Bjarni: The opponent group’s issue was related to GPU VRAM already being occupied on their instance, not a data loading problem.
 
 ### Supervisor Meeting
-- Scheduled for Thursday 
+Here’s a structured version of your meeting notes, organized by topic:
+
+#### Server Usage
+- **Server Utilization**: The team has successfully utilized the server without issues.
+
+#### Experiment Focus and Dataset Selection
+- **Infinigrams**: Testing infinigrams remains a goal if time permits, though priority is on trying a larger or improved dataset first.
+- **Dataset Choice**: The team is considering using Wikipedia or GPT-2's dataset as the base for experiments.
+
+#### N-gram Implementation and Library
+- **New N-gram Library**: Boti published a library for n-gram statistics, overcoming a memory limitation by adopting a vector memory architecture from Facebook.
+- **Smoothing Techniques**: After discussing various smoothing options, Boti’s Kneser approach was preferred.
+- **Repository Review**: No existing n-gram repositories support marginalization and rule adaptation like Nguyen's work, prompting Johan’s suggestion to publish their solution.
+
+#### Experiment Analysis and Metrics
+- **Nguyen’s Experiments**: The team analyzed Nguyen's experiments, gathering the metrics necessary for replication.
+- **N-gram vs. Transformer Comparison**: Bjarni anticipates the transformer will perform better, though the TinyStories dataset shows only a minor difference.
+
+#### Smoothing Discussion
+- **Importance of Smoothing**: Bjarni emphasized that without smoothing, results may be biased, as transformers may not be accurately explained by n-grams, especially when token sequences aren’t present in training data. Johan agreed on the necessity, and Jonas recommended experimenting with smoothing.
+
+#### Collaboration and Sharing Insights
+- **Guidance to Other Group**: The team shared training insights to support the other group’s progress.
+- **Smoothing Challenges**: Given that smoothing requires substantial computational resources, Johan noted this could disadvantage the other group due to their slower approach.
+
+#### Report and Documentation
+- **N-gram Implementation Details**: Johan requested a thorough description of the n-gram implementation for the report.
+
+#### Testing and Training Plans
+- **Logger Test**: Johan suggested a small test run to finalize the logger code before full-scale training.
+- **Training Timeline**: The team aims to start training next week, recognizing that while plans are essential, flexibility is equally important.
+
+#### Additional Notes
+- **New Dataset and Tokenizer**: Changing the dataset would necessitate training a new tokenizer but shouldn’t present major issues.
+- **Training Bug**: A conflict arose when another user started a training run simultaneously, indicating the need for coordination in scheduling training runs.
+ 
 ---
 
 ## Week 43 (21.10.2024 - 27.10.2024)
