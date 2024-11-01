@@ -1,6 +1,7 @@
 from pathlib import Path
 
-import torch
+import wandb
+import threading
 import numpy as np
 from ngram_trie import PySmoothedTrie
 
@@ -10,35 +11,48 @@ except ImportError: from dataset import MemmapDataset
 CHECKPOINT_PATH = Path(__file__).parent.parent.parent / "checkpoints" / "ngram/"
 CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
 
-def formatted_ngram_probs(token_probs:list[tuple[int, list[tuple[str, float]]]])->dict[str, np.ndarray]:
+
+def formatted_ngram_probs(token_probs:list[tuple[str,list[tuple[int,float]]]])->dict[str,np.ndarray]:
+    """Convert the output of PySmoothedTrie.get_prediction_probabilities into a dict of 2d arrays (rules -> batch x vocab)"""
     rule_to_probs = {}
+
+    B, V = len(token_probs), len(token_probs[0][1])
     
-    for token_idx, rule_probs in token_probs:
-        for rule, prob in rule_probs:
-            rule_to_probs[rule] = rule_to_probs.get(rule, np.zeros(len(token_probs)))
-            rule_to_probs[rule][token_idx] = prob
+    for i, (rule, rule_probs) in enumerate(token_probs):
+        rule_to_probs[rule] = rule_to_probs.get(rule, np.zeros((B, V)))  # initialize if not present
+        rule_to_probs[rule][i] = np.array([prob for _, prob in rule_probs])
             
     return rule_to_probs
 
+
 class NGramTrie:  # wrapping the ngram-trie crate
-    def __init__(self, ngram_file:str, max_ngram_length:int=7):
-        self.trie = PySmoothedTrie.load(CHECKPOINT_PATH / ngram_file)
+    def __init__(self, ngram_file:str, max_ngram_length:int=7, root_capacity:int=2**14):  # 2**14 is the vocab size of the tokenizer
+        self.trie = PySmoothedTrie(max_ngram_length, root_capacity)
+        self.trie.load(str(CHECKPOINT_PATH / ngram_file))
         self.max_ngram_length = max_ngram_length
-        
-    def run_all_metrics(self, text, logits):
+
+    def async_run_all_metrics(self, tokens:np.ndarray, model_p:np.ndarray, step:int):
+        def run():
+            metrics = self.run_all_metrics(tokens, model_p)
+            wandb.log(metrics, step=step)
+            
+        t = threading.Thread(target=run)
+        t.start()
+
+    def run_all_metrics(self, tokens:np.ndarray, model_p:np.ndarray)->dict[str, float]:
         return {
-            **self.all_metrics(text, logits), # important to do this first for caching reasons
-            **self.subgram_metrics(text, logits),
-            **self.suffix_metrics(text, logits),
-            # **self.backoff_metrics(text, logits),
+            **self.all_metrics(tokens, model_p), # important to do this first for caching reasons
+            **self.subgram_metrics(tokens, model_p),
+            **self.suffix_metrics(tokens, model_p),
+            # **self.backoff_metrics(tokens, model_p),
             # ... heatmaps, tables, etc.
         }
     
-    def calculate_metrics(self, texts:list[str], model_p:np.ndarray, name:str):
+    def calculate_metrics(self, tokens:np.ndarray, model_p:np.ndarray, name:str):
         """Metrics regarding all possible ngram rules, for the currently selected rule set"""
                 
-        probs = [self.trie.get_smoothed_probabilities(text) for text in texts]
-        probs = [formatted_ngram_probs(p) for p in probs]
+        probs = [self.trie.get_prediction_probabilities(tokens) for tokens in tokens]
+        probs = [formatted_ngram_probs(p) for p in probs]  # dict -> 2d array instead
         
         def top_1(i):
             filtered_probs = [{r: p for r, p in rule_dict.items() if len(r) <= i} for rule_dict in probs]
@@ -61,21 +75,21 @@ class NGramTrie:  # wrapping the ngram-trie crate
             **{f"variation_distance/{name}_{i}": variation_distance(i) for i in range(1, self.max_ngram_length)}
         }
         
-    def all_metrics(self, texts:list[str], model_p:np.ndarray):
+    def all_metrics(self, tokens:np.ndarray, model_p:np.ndarray):
         self.trie.set_all_ruleset_by_length(self.max_ngram_length-1)  # -1 for context
-        return self.calculate_metrics(texts, model_p, "all")
+        return self.calculate_metrics(tokens, model_p, "all")
 
-    def subgram_metrics(self, texts:list[str], model_p:np.ndarray):
+    def subgram_metrics(self, tokens:np.ndarray, model_p:np.ndarray):
         self.trie.set_subgram_ruleset_by_length(self.max_ngram_length-1)
-        return self.calculate_metrics(texts, model_p, "subgram")
+        return self.calculate_metrics(tokens, model_p, "subgram")
     
-    def suffix_metrics(self, texts:list[str], model_p:np.ndarray)->dict:
+    def suffix_metrics(self, tokens:np.ndarray, model_p:np.ndarray)->dict:
         self.trie.set_suffix_ruleset_by_length(self.max_ngram_length-1)
-        return self.calculate_metrics(texts, model_p, "suffix")
+        return self.calculate_metrics(tokens, model_p, "suffix")
     
-    def backoff_metrics(self, texts:list[str], model_p:np.ndarray)->dict:
-        self.trie.set_backoff_ruleset_by_length(self.max_ngram_length-1)
-        return self.calculate_metrics(texts, model_p, "backoff")
+    # def backoff_metrics(self, texts:list[str], model_p:np.ndarray)->dict:
+    #     self.trie.set_backoff_ruleset_by_length(self.max_ngram_length-1)
+    #     return self.calculate_metrics(texts, model_p, "backoff")
     
   
 if __name__ == "__main__":
@@ -92,9 +106,10 @@ if __name__ == "__main__":
     
     ds = MemmapDataset(args.dataset_file, args.tokenizer_name, num_tokens=int(1e32)) # i.e. just read all the tokens
     tokens = ds[0].tolist()
-    
+
+
     print(f"Instantiating trie")
-    trie = PySmoothedTrie(n_gram_max_length=7, root_capacity=None)
+    trie = PySmoothedTrie(n_gram_max_length=7, root_capacity=max(tokens)+1)
     
     print(f"Fitting trie")
     trie.fit(tokens, n_gram_max_length=7, root_capacity=max(tokens)+1)

@@ -1,11 +1,10 @@
-import json
-from tqdm import tqdm
 from pathlib import Path
 from typing import Tuple
+
 from tokenizers import Tokenizer
 from tokenizers.models import BPE
 from tokenizers.trainers import BpeTrainer
-from tokenizers.pre_tokenizers import ByteLevel, Whitespace
+from tokenizers.pre_tokenizers import ByteLevel
 from tokenizers.decoders import ByteLevel as ByteLevelDecoder
 
 CHECKPOINT_PATH = Path(__file__).parent.parent.parent / "checkpoints" / "tokenizer"
