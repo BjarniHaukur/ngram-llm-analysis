@@ -7,7 +7,13 @@ Project Manager: Felix
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8+**
+- Some bugs were found in the ngram trie implementation, wrong cache initialization, division by zero in some cases
+- Fixed the bugs
+- Created subset functions for ruleset calculations, so we can calculate rules for suffix and subgram rulesets
+- After the bugfixes the smoothing slowed down, but it is still manageable
+- Wrote documentation for Python intellisense, so it is easier to work with
+- Talked with Bjarni about the rule selection and metrics we want to log
 
 ### Jonas
 - **Number of hours this week: 7h**
@@ -24,7 +30,40 @@ Project Manager: Felix
 - Clarification from Bjarni: The opponent group’s issue was related to GPU VRAM already being occupied on their instance, not a data loading problem.
 
 ### Supervisor Meeting
-- Scheduled for Thursday 
+#### Server Usage
+- **Server Utilization**: The team has successfully utilized the server without issues.
+
+#### Experiment Focus and Dataset Selection
+- **Infinigrams**: Testing infinigrams remains a goal if time permits, though priority is on trying a larger or improved dataset first.
+- **Dataset Choice**: The team is considering using Wikipedia or GPT-2's dataset as the base for experiments.
+
+#### N-gram Implementation and Library
+- **New N-gram Library**: Boti published a library for n-gram statistics, overcoming a memory limitation by adopting a vector memory architecture from Facebook.
+- **Smoothing Techniques**: After discussing various smoothing options, Boti’s Kneser approach was preferred.
+- **Repository Review**: No existing n-gram repositories support marginalization and rule adaptation like Nguyen's work, prompting Johan’s suggestion to publish their solution.
+
+#### Experiment Analysis and Metrics
+- **Nguyen’s Experiments**: The team analyzed Nguyen's experiments, gathering the metrics necessary for replication.
+- **N-gram vs. Transformer Comparison**: Bjarni anticipates the transformer will perform better, though the TinyStories dataset shows only a minor difference.
+
+#### Smoothing Discussion
+- **Importance of Smoothing**: Bjarni emphasized that without smoothing, results may be biased, as transformers may not be accurately explained by n-grams, especially when token sequences aren’t present in training data. Johan agreed on the necessity, and Jonas recommended experimenting with smoothing.
+
+#### Collaboration and Sharing Insights
+- **Guidance to Other Group**: The team shared training insights to support the other group’s progress.
+- **Smoothing Challenges**: Given that smoothing requires substantial computational resources, Johan noted this could disadvantage the other group due to their slower approach.
+
+#### Report and Documentation
+- **N-gram Implementation Details**: Johan requested a thorough description of the n-gram implementation for the report.
+
+#### Testing and Training Plans
+- **Logger Test**: Johan suggested a small test run to finalize the logger code before full-scale training.
+- **Training Timeline**: The team aims to start training next week, recognizing that while plans are essential, flexibility is equally important.
+
+#### Additional Notes
+- **New Dataset and Tokenizer**: Changing the dataset would necessitate training a new tokenizer but shouldn’t present major issues.
+- **Training Bug**: A conflict arose when another user started a training run simultaneously, indicating the need for coordination in scheduling training runs.
+ 
 ---
 
 ## Week 43 (21.10.2024 - 27.10.2024)
@@ -34,7 +73,20 @@ Project Manager: Boti
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 40+**
+- Iterated the ngram trie implementation in Rust
+- Created pybindings, published the first version of the library (ngram-trie) to PyPI
+- Moved to using a logger for metrics on the speed
+- Implemented parallel computation, it was still slow for smoothing, investigated why later
+- Reworked the smoothing initialization, for faster and parallel computation
+- Tried caching with data copying, but it used too much memory
+- Reworked the trie so it can be cached efficiently, and still be used for parallel computation relatively fast
+- Changed reference counting library (RcLite forked for some more functionality) to use less overhead and be a little bit faster
+- Fine tuned cache sizes, fixed some bugs that presented with caching
+- Found the bug in smoothing, we have to calculate the rules in order for the caching to be the most efficient (also the caching function was improved a bit)
+- Moved ruleset to another object, so it is easier to work with
+- Wrote documentation for the interface and tested the library
+- Huge code cleanup, and rigorosly testing the speeds at every iteration, debugging some performance issues
 
 ### Jonas
 - **Number of hours this week: 4h**
@@ -61,7 +113,8 @@ Project Manager: XXX
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 0**
+- Exam week
 
 ### Jonas
 - **Number of hours this week: 0h**
@@ -86,12 +139,14 @@ Project Manager: Bjarni
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: ~15+**
+- **Number of hours this week: 20**
 - Iterated the ngram trie implementation in Rust
 - Code cleanup
 - Switched to u16 for keys
-- Switched to BTreeMap for less memory usage
+- Tried BTreeMap for less memory usage, found sorted_vec_map (forked it so we can use some more functionality) and it used even less memory and was still fast
 - Benchmarking memory usage and speed
+- Fine tuned some default variables
+- A bug still persists where if we fit the trie, the memory allocation is larger by ~25%, but when we load this trie from disk it stays maybe the correct amount. Still investigating.
 
 ### Jonas
 - **Number of hours this week: 2h**
