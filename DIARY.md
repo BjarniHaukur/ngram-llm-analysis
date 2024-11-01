@@ -7,7 +7,13 @@ Project Manager: Felix
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8+**
+- Some bugs were found in the ngram trie implementation, wrong cache initialization, division by zero in some cases
+- Fixed the bugs
+- Created subset functions for ruleset calculations, so we can calculate rules for suffix and subgram rulesets
+- After the bugfixes the smoothing slowed down, but it is still manageable
+- Wrote documentation for Python intellisense, so it is easier to work with
+- Talked with Bjarni about the rule selection and metrics we want to log
 
 ### Jonas
 - **Number of hours this week: 7h**
@@ -67,7 +73,20 @@ Project Manager: Boti
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 40+**
+- Iterated the ngram trie implementation in Rust
+- Created pybindings, published the first version of the library (ngram-trie) to PyPI
+- Moved to using a logger for metrics on the speed
+- Implemented parallel computation, it was still slow for smoothing, investigated why later
+- Reworked the smoothing initialization, for faster and parallel computation
+- Tried caching with data copying, but it used too much memory
+- Reworked the trie so it can be cached efficiently, and still be used for parallel computation relatively fast
+- Changed reference counting library (RcLite forked for some more functionality) to use less overhead and be a little bit faster
+- Fine tuned cache sizes, fixed some bugs that presented with caching
+- Found the bug in smoothing, we have to calculate the rules in order for the caching to be the most efficient (also the caching function was improved a bit)
+- Moved ruleset to another object, so it is easier to work with
+- Wrote documentation for the interface and tested the library
+- Huge code cleanup, and rigorosly testing the speeds at every iteration, debugging some performance issues
 
 ### Jonas
 - **Number of hours this week: 4h**
@@ -94,7 +113,8 @@ Project Manager: XXX
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 0**
+- Exam week
 
 ### Jonas
 - **Number of hours this week: 0h**
@@ -119,12 +139,14 @@ Project Manager: Bjarni
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: ~15+**
+- **Number of hours this week: 20**
 - Iterated the ngram trie implementation in Rust
 - Code cleanup
 - Switched to u16 for keys
-- Switched to BTreeMap for less memory usage
+- Tried BTreeMap for less memory usage, found sorted_vec_map (forked it so we can use some more functionality) and it used even less memory and was still fast
 - Benchmarking memory usage and speed
+- Fine tuned some default variables
+- A bug still persists where if we fit the trie, the memory allocation is larger by ~25%, but when we load this trie from disk it stays maybe the correct amount. Still investigating.
 
 ### Jonas
 - **Number of hours this week: 2h**
