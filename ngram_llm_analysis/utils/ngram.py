@@ -47,7 +47,7 @@ class NGramTrie:  # wrapping the ngram-trie crate
     def calculate_metrics(self, tokens:np.ndarray, model_p:np.ndarray, name:str):
         """Metrics regarding all possible ngram rules, for the currently selected rule set"""
                 
-        probs = [self.trie.get_prediction_probabilities(tokens) for tokens in tokens]
+        probs = [self.trie.get_prediction_probabilities(tokens.tolist()) for tokens in tokens]
         probs = formatted_ngram_probs(probs)
         
         def top_1(i):
