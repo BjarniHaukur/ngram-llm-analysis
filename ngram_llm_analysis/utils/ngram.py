@@ -1,3 +1,4 @@
+import queue
 import threading
 from pathlib import Path
 
@@ -35,14 +36,32 @@ class NGramTrie:  # wrapping the ngram-trie crate
         self.trie.load(str(CHECKPOINT_PATH / ngram_file))
         self.max_ngram_length = max_ngram_length
 
-    def log_metrics_async(self, tokens:np.ndarray, model_p:np.ndarray, step:int):
-        def run():
+        self.log_queue = queue.Queue()
+        self.max_queue_size_warning_threshold = 10
+        self.worker_thread = threading.Thread(target=self._log_worker)
+        self.worker_thread.daemon = True  # So it exits when the main thread exits
+        self.worker_thread.start()
+
+        wandb.define_metric("async_step")
+        wandb.define_metric("top_1/*", summary="max", step_sync=False)
+        wandb.define_metric("variation_distance/*", summary="max", step_sync=False)
+
+    def _log_worker(self):
+        while True:
+            item = self.log_queue.get()
+            if item is None:
+                break  # Exit the thread
+            tokens, model_p, step = item
             metrics = self.run_all_metrics(tokens, model_p)
             wandb.log(metrics, step=step)
-            
-        t = threading.Thread(target=run)
-        t.start()
+            self.log_queue.task_done()
 
+    def log_metrics_async(self, tokens: np.ndarray, model_p: np.ndarray, step: int):
+        if self.log_queue.qsize() > self.max_queue_size_warning_threshold:
+            print(
+                f"Warning: log_queue size is {self.log_queue.qsize()}, exceeding threshold {self.max_queue_size_warning_threshold}"
+            )
+        self.log_queue.put((tokens, model_p, step))
 
     def run_all_metrics(self, tokens:np.ndarray, model_p:np.ndarray)->dict[str, float]:
         return {
