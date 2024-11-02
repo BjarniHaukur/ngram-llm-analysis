@@ -23,6 +23,7 @@ torch.random.manual_seed(1337)
 if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
 
 CHECKPOINT_PATH = Path(__file__).parent.parent / "checkpoints" / "models"
+CONFIG_PATH = Path(__file__).parent.parent / "configs"
 
 
 def cycle(dl:DataLoader):  # itertools.cycle can causes memory leak with computationally heavy tasks
@@ -44,7 +45,7 @@ def main(args):
     print(f"Training on device: {DEVICE}")
     print(f"Training in dtype: {DTYPE}")
     
-    with open("../configs/" + (args.config if args.config.endswith(".yaml") else args.config + ".yaml"), "r") as file:
+    with open(CONFIG_PATH / (args.config if args.config.endswith(".yaml") else args.config + ".yaml"), "r") as file:
         config = yaml.safe_load(file)
         
     seq_len = config["max_position_embeddings"] - 1  # account for <bos> and <eos>
