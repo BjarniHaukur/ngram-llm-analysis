@@ -177,14 +177,17 @@ def main(args):
 
                     if val_step > 0: continue  # this is getting too nested (only perform once)
 
-                    trie.log_metrics_async(x_val.numpy(), y_hat.numpy(), step)
+                    ngram_statistics = trie.run_all_metrics(x_val.numpy(), y_hat.numpy())
 
                     continuation = "".join(list(stream_generation(model, tokenizer, max_length=50, temperature=0.7)))
-                    wandb.log({"generated_text": wandb.Html(color_text_html(tokenizer, continuation))}, step=step)
+                    wandb.log({
+                        "generated_text": wandb.Html(color_text_html(tokenizer, continuation))
+                    }, step=step)
                                 
                 wandb.log({
                     "val_loss": total_val_loss / NUM_VAL_STEPS,
-                    "val_perplexity": total_val_perplexity / NUM_VAL_STEPS
+                    "val_perplexity": total_val_perplexity / NUM_VAL_STEPS,
+                    **ngram_statistics
                 }, step=step)
 
             model.train()

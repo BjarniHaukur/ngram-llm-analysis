@@ -35,15 +35,6 @@ class NGramTrie:  # wrapping the ngram-trie crate
         self.trie.load(str(CHECKPOINT_PATH / ngram_file))
         self.max_ngram_length = max_ngram_length
 
-    def log_metrics_async(self, tokens:np.ndarray, model_p:np.ndarray, step:int):
-        def run():
-            metrics = self.run_all_metrics(tokens, model_p)
-            wandb.log(metrics, step=step)
-            
-        t = threading.Thread(target=run)
-        t.start()
-
-
     def run_all_metrics(self, tokens:np.ndarray, model_p:np.ndarray)->dict[str, float]:
         return {
             **self.all_metrics(tokens, model_p), # important to do this first for caching reasons
