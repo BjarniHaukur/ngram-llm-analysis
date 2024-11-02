@@ -90,7 +90,6 @@ def build_tokenizer(data_name:str, name:str = "tokenizer", vocab_size:int = 8096
 
     # First pass to count total lines
     with open(data_file, "r") as f:
-        f.readline()  # Skip the first line
         for _ in f:
             total_lines += 1
 
@@ -98,7 +97,6 @@ def build_tokenizer(data_name:str, name:str = "tokenizer", vocab_size:int = 8096
 
     def data_iterator():
         with open(data_file, "r") as f:
-            f.readline()  # Skip the first line
             for i, line in enumerate(f):
                 if i >= num_lines_to_read:
                     break

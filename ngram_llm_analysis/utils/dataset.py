@@ -42,7 +42,6 @@ def build_memmap(dataset_file:str, tokenizer_name:str, batch_size:int=8192):
     total_tokens = 0
     temp_file = tempfile.TemporaryFile()
     with open(dataset_path, 'r', encoding='utf-8') as file:
-        file.readline()  # Skip the first line
         batch_lines = []
         pbar = tqdm(desc="Tokenizing and writing to tempfile...", unit=" lines")
         for line in file:
