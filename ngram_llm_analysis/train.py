@@ -9,6 +9,7 @@ import numpy as np
 from tqdm import tqdm
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.optim import AdamW
 from torch.utils.data import random_split, DataLoader
 
@@ -30,7 +31,7 @@ def cycle(dl:DataLoader):  # itertools.cycle can causes memory leak with computa
 
 def main(args):
     print("Loading trie...")
-    trie = NGramTrie(args.ngram_file)
+    trie = NGramTrie(args.ngram_file, args.ngram_max_length)
     print("Trie loaded.")
 
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -159,7 +160,7 @@ def main(args):
             with torch.no_grad():
                 total_val_loss = 0
                 total_val_perplexity = 0
-                for val_step in range(NUM_VAL_STEPS):
+                for _ in range(NUM_VAL_STEPS):
                     val_batch = next(val_dl).to(DEVICE, non_blocking=True)
                     x_val = val_batch[..., :-1]
                     y_val = val_batch[..., 1:]
@@ -175,18 +176,17 @@ def main(args):
                     total_val_perplexity += perplexity
                     step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
 
-                    if val_step > 0: continue  # this is getting too nested (only perform once)
-
-                    ngram_statistics = trie.run_all_metrics(x_val.cpu().numpy(), y_hat.cpu().numpy())
-
-                    continuation = "".join(list(stream_generation(model, tokenizer, max_length=50, temperature=0.7)))
-                    wandb.log({
-                        "generated_text": wandb.Html(color_text_html(tokenizer, continuation))
-                    }, step=step)
+                n_context = args.ngram_max_length - 1
+                tokens = x_val[..., -n_context:].cpu().numpy()
+                model_p = F.softmax(y_hat[:, -n_context:, :], dim=-1).cpu().numpy()
+                ngram_statistics = trie.run_all_metrics(tokens, model_p)
+                
+                generated_text = "".join(list(stream_generation(model, tokenizer, max_length=50, temperature=0.7)))
                                 
                 wandb.log({
                     "val_loss": total_val_loss / NUM_VAL_STEPS,
                     "val_perplexity": total_val_perplexity / NUM_VAL_STEPS,
+                    "generated_text": wandb.Html(color_text_html(tokenizer, generated_text)),
                     **ngram_statistics
                 }, step=step)
 
@@ -208,6 +208,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, required=True, help="Name of dataset file. Type: .txt")
     parser.add_argument("--config", type=str, required=True, help="Name of the model configuration file. Type: .yaml")
     parser.add_argument("--ngram_file", type=str, default="ngram", help="Path to ngram file to use for smoothed trie.")
+    parser.add_argument("--ngram_max_length", type=int, default=7, help="Maximum length of ngrams to use for smoothed trie.")
     parser.add_argument("--run_name", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=5)
