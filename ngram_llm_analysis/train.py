@@ -21,7 +21,7 @@ from utils.tokenizer import load_tokenizer, color_text_html
 torch.random.manual_seed(1337)
 if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
 
-CHECKPOINT_PATH = Path("../checkpoints/models")
+CHECKPOINT_PATH = Path(__file__).parent.parent / "checkpoints" / "models"
 
 
 def cycle(dl:DataLoader):  # itertools.cycle can causes memory leak with computationally heavy tasks
@@ -177,7 +177,7 @@ def main(args):
 
                     if val_step > 0: continue  # this is getting too nested (only perform once)
 
-                    ngram_statistics = trie.run_all_metrics(x_val.numpy(), y_hat.numpy())
+                    ngram_statistics = trie.run_all_metrics(x_val.cpu().numpy(), y_hat.cpu().numpy())
 
                     continuation = "".join(list(stream_generation(model, tokenizer, max_length=50, temperature=0.7)))
                     wandb.log({
