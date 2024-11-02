@@ -9,8 +9,8 @@ from tokenizers.decoders import ByteLevel as ByteLevelDecoder
 
 CHECKPOINT_PATH = Path(__file__).parent.parent.parent / "checkpoints" / "tokenizer"
 
-BOS, BOS_ID = "<bos>", 0
-EOS, EOS_ID = "<eos>", 1
+BOS, BOS_ID = "<bos>", 0  # we process the data such that each story starts with <bos> and ends with <eos>
+EOS, EOS_ID = "<eos>", 1  # (i.e not necessarily the beginning and end of sequence, rather the start and end of a story / source)
 PAD, PAD_ID = "<pad>", 2
 UNK, UNK_ID = "<unk>", 3
 
