@@ -13,10 +13,11 @@ import torch.nn as nn
 from torch.optim import AdamW
 from torch.utils.data import random_split, DataLoader
 
+from utils.ngram import NGramTrie
+from utils.model import model_from_config
+from utils.sample import stream_generation
 from utils.dataset import MemmapDataset
 from utils.tokenizer import load_tokenizer, color_text_html
-from utils.sample import stream_generation
-from utils.model import model_from_config
 
 torch.random.manual_seed(1337)
 if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
@@ -34,6 +35,10 @@ def collate_fn(batch, tokenizer, max_len=2048):
     return torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=pad_id)
 
 def main(args):
+    print("Loading trie...")
+    trie = NGramTrie(args.ngram_file)
+    print("Trie loaded.")
+
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     DTYPE = torch.bfloat16 if DEVICE=="cuda" else torch.float16
 
@@ -177,7 +182,9 @@ def main(args):
                     total_val_perplexity += perplexity
                     step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
 
-                    if val_step > 0: continue  # this is getting too nested
+                    if val_step > 0: continue  # this is getting too nested (only perform once)
+
+                    trie.log_metrics_async(x_val.numpy(), y_hat.numpy(), step)
 
                     prompt = "\"\"Once upon "
                     continuation = "".join(list(stream_generation(model, tokenizer, prompt=prompt, max_length=50, temperature=0.7)))
@@ -204,6 +211,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train transformer model")
     parser.add_argument("--dataset", type=str, required=True, help="Name of dataset file. Type: .txt")
     parser.add_argument("--config", type=str, required=True, help="Name of the model configuration file. Type: .yaml")
+    parser.add_argument("--ngram_file", type=str, default="ngram", help="Path to ngram file to use for smoothed trie.")
     parser.add_argument("--run_name", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=5)

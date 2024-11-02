@@ -1,27 +1,31 @@
+import threading
 from pathlib import Path
 
 import wandb
-import threading
 import numpy as np
 from ngram_trie import PySmoothedTrie
 
 try: from .dataset import MemmapDataset
 except ImportError: from dataset import MemmapDataset
 
+try: from .tokenizer import load_tokenizer
+except ImportError: from tokenizer import load_tokenizer
+
 CHECKPOINT_PATH = Path(__file__).parent.parent.parent / "checkpoints" / "ngram/"
 CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
 
 
-def formatted_ngram_probs(token_probs:list[tuple[str,list[tuple[int,float]]]])->dict[str,np.ndarray]:
-    """Convert the output of PySmoothedTrie.get_prediction_probabilities into a dict of 2d arrays (rules -> batch x vocab)"""
+def formatted_ngram_probs(batch_results:list[list[tuple[str,list[tuple[int,float]]]]])->dict[str,np.ndarray]:  # lol, lmao even
+    """Converts a batch of outputs from PySmoothedTrie.get_prediction_probabilities into a dict of 2d arrays (rules -> batch x vocab)"""
     rule_to_probs = {}
 
-    B, V = len(token_probs), len(token_probs[0][1])
-    
-    for i, (rule, rule_probs) in enumerate(token_probs):
-        rule_to_probs[rule] = rule_to_probs.get(rule, np.zeros((B, V)))  # initialize if not present
-        rule_to_probs[rule][i] = np.array([prob for _, prob in rule_probs])
-            
+    B, V = len(batch_results), len(batch_results[0][0][1])
+
+    for i, result in enumerate(batch_results):
+        for rule, rule_probs in result:
+            rule_to_probs[rule] = rule_to_probs.get(rule, np.zeros((B, V)))  # initialize if not present
+            rule_to_probs[rule][i] = np.array([prob for _, prob in rule_probs])
+                
     return rule_to_probs
 
 
@@ -31,13 +35,14 @@ class NGramTrie:  # wrapping the ngram-trie crate
         self.trie.load(str(CHECKPOINT_PATH / ngram_file))
         self.max_ngram_length = max_ngram_length
 
-    def async_run_all_metrics(self, tokens:np.ndarray, model_p:np.ndarray, step:int):
+    def log_metrics_async(self, tokens:np.ndarray, model_p:np.ndarray, step:int):
         def run():
             metrics = self.run_all_metrics(tokens, model_p)
             wandb.log(metrics, step=step)
             
         t = threading.Thread(target=run)
         t.start()
+
 
     def run_all_metrics(self, tokens:np.ndarray, model_p:np.ndarray)->dict[str, float]:
         return {
@@ -52,22 +57,22 @@ class NGramTrie:  # wrapping the ngram-trie crate
         """Metrics regarding all possible ngram rules, for the currently selected rule set"""
                 
         probs = [self.trie.get_prediction_probabilities(tokens) for tokens in tokens]
-        probs = [formatted_ngram_probs(p) for p in probs]  # dict -> 2d array instead
+        probs = formatted_ngram_probs(probs)
         
         def top_1(i):
-            filtered_probs = [{r: p for r, p in rule_dict.items() if len(r) <= i} for rule_dict in probs]
-            has_argmax_match = [
-                np.any([np.argmax(model_p) == np.argmax(p) for p in rule_dict.values()])
-                for rule_dict in filtered_probs
-            ]
+            filtered_probs = {r: p for r, p in probs.items() if len(r) <= i}
+            has_argmax_match = np.any([
+                np.argmax(model_p, axis=1) == np.argmax(p, axis=1)
+                for p in filtered_probs.values()
+            ], axis=0)
             return np.mean(has_argmax_match)
             
         def variation_distance(i):
-            filtered_probs = [{r: p for r, p in rule_dict.items() if len(r) <= i} for rule_dict in probs]
-            smallest_variational_distances = [
-                np.min([np.abs(p - model_p).sum() for p in rule_dict.values()])  # abs shouldnt be needed (probabilities are non-negative)
-                for rule_dict in filtered_probs
-            ]
+            filtered_probs = {r: p for r, p in probs.items() if len(r) <= i}
+            smallest_variational_distances = np.min([
+                np.abs(p - model_p).sum(axis=1)
+                for p in filtered_probs.values()
+            ], axis=0)
             return np.mean(smallest_variational_distances)
         
         return {
@@ -107,12 +112,14 @@ if __name__ == "__main__":
     ds = MemmapDataset(args.dataset_file, args.tokenizer_name, num_tokens=int(1e32)) # i.e. just read all the tokens
     tokens = ds[0].tolist()
 
+    tokenizer = load_tokenizer(args.tokenizer_name)
+    root_capacity = tokenizer.get_vocab_size()
 
     print(f"Instantiating trie")
-    trie = PySmoothedTrie(n_gram_max_length=7, root_capacity=max(tokens)+1)
+    trie = PySmoothedTrie(n_gram_max_length=7, root_capacity=root_capacity)
     
     print(f"Fitting trie")
-    trie.fit(tokens, n_gram_max_length=7, root_capacity=max(tokens)+1)
+    trie.fit(tokens, n_gram_max_length=7, root_capacity=root_capacity)
     
     print(f"Saving trie to {CHECKPOINT_PATH / args.ngram_file}")
     trie.save(str(CHECKPOINT_PATH / args.ngram_file))
