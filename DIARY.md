@@ -1,5 +1,27 @@
 # Team Diary
 
+## Week 45 (04.11.2024 - 10.11.2024)
+Project Manager: Jonas
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+
+### Peer Group Meeting
+- Scheduled for Thuesday
+
+### Supervisor Meeting
+- Scheduled for Thursday
+---
+
 ## Week 44 (28.10.2024 - 03.11.2024)
 Project Manager: Felix
 
@@ -24,7 +46,19 @@ Project Manager: Felix
 - worked on top1 accuracy. Integrating the ngram and transformer predictions. Tried to understand what is sought after in terms of the metrics. Thoughts regarding what sentences/contexts should be given to the calculations. 
 
 ### Felix
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8h**
+- **Experiment Analysis (Nguyen’s Work)**  
+  - Analyzed Nguyen's experimental setups, focusing on parameter choices (e.g., smoothing, sequence steps).
+  - Documented insights for aligning our approach and identifying gaps
+- **Clustered Parameters for Tracking**  
+  - Grouped essential parameters (n-gram order, smoothing, dataset, memory).
+  - Set up a system to track and compare parameters during training
+- **Prepared Papers on New Experiment Ideas**  
+  - Collected papers on advanced smoothing, adaptive n-grams, and OOV handling.
+  - Identified potential new experiments for future model refinement
+- **Organizational and Reporting Tasks**  
+  - Drafted intro, problem statement, and methodology in report.
+  - Updated task tracker, scheduled check-ins, and outlined sections per feedback.
 
 ### Peer Group Meeting
 - The opponent group does not use smoothing, applying a specific rule (around 30 seconds for the rule).
