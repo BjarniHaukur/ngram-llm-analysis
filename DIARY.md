@@ -16,7 +16,10 @@ Project Manager: Jonas
 - **Number of hours this week: TBD**
 
 ### Peer Group Meeting
-- Scheduled for Thuesday
+- **Smoothing Issues**: Both groups are encountering significant difficulties with smoothing techniques for n-grams, especially given the complexity added by custom rulesets like marginalization.
+- **Simplifying Assumption Consideration**: Due to these challenges, both groups are contemplating omitting smoothing as a simplifying assumption, acknowledging the potential impact on results.
+- **Project Challenges**: Boti expressed concerns that the project might be reaching a point of diminishing returns, suggesting that further progress could be challenging.
+- **Rust Implementation Review**: Bjarni has offered to review his Rust implementation in hopes of addressing some of these issues, though he noted his limited expertise in this area.
 
 ### Supervisor Meeting
 - Scheduled for Thursday
