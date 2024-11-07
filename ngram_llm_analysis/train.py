@@ -2,7 +2,6 @@ import math
 import argparse
 from pathlib import Path
 from functools import partial
-from itertools import cycle
 
 import yaml
 import wandb
@@ -13,27 +12,27 @@ import torch.nn as nn
 from torch.optim import AdamW
 from torch.utils.data import random_split, DataLoader
 
+from utils.ngram import NGramTrie
+from utils.model import model_from_config
+from utils.sample import stream_generation
 from utils.dataset import MemmapDataset
 from utils.tokenizer import load_tokenizer, color_text_html
-from utils.sample import stream_generation
-from utils.model import model_from_config
 
 torch.random.manual_seed(1337)
 if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
 
 CHECKPOINT_PATH = Path("../checkpoints/models")
 
-def collate_fn(batch, tokenizer, max_len=2048):
-    batch = [x[:max_len] for x in batch]
-    bos_id = tokenizer.token_to_id("<bos>")
-    eos_id = tokenizer.token_to_id("<eos>")
-    pad_id = tokenizer.token_to_id("<pad>")
-    
-    batch = [torch.cat([torch.tensor([bos_id], dtype=torch.long), x, torch.tensor([eos_id], dtype=torch.long)]) for x in batch]
 
-    return torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=pad_id)
+def cycle(dl:DataLoader):  # itertools.cycle can causes memory leak with computationally heavy tasks
+    while True:
+        yield from dl
 
 def main(args):
+    print("Loading trie...")
+    trie = NGramTrie(args.ngram_file)
+    print("Trie loaded.")
+
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     DTYPE = torch.bfloat16 if DEVICE=="cuda" else torch.float16
 
@@ -81,9 +80,8 @@ def main(args):
         return args.min_lr + coeff * (args.max_lr - args.min_lr)
 
     # make the dataloaders cycle on end of dataset, so we can keep calling next() on them
-    collate = partial(collate_fn, max_len=seq_len, tokenizer=tokenizer)
-    train_dl = cycle(DataLoader(train_ds, batch_size=args.batch_size, collate_fn=collate, shuffle=True, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True, drop_last=True))
-    val_dl = cycle(DataLoader(val_ds, batch_size=args.batch_size, collate_fn=collate, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True, drop_last=True))
+    train_dl = cycle(DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True, drop_last=True))
+    val_dl = cycle(DataLoader(val_ds, batch_size=args.batch_size, prefetch_factor=args.prefetch_factor, num_workers=args.num_workers, persistent_workers=True, pin_memory=True, drop_last=True))
 
     model = model_from_config(config).to(DEVICE)
     model = torch.compile(model, backend="aot_eager")
@@ -177,16 +175,18 @@ def main(args):
                     total_val_perplexity += perplexity
                     step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
 
-                    if val_step > 0: continue  # this is getting too nested
+                    if val_step > 0: continue  # this is getting too nested (only perform once)
 
-                    prompt = "\"\"Once upon "
-                    continuation = "".join(list(stream_generation(model, tokenizer, prompt=prompt, max_length=50, temperature=0.7)))
-                    wandb.log({"generated_text": wandb.Html(color_text_html(tokenizer, prompt + continuation))}, step=step)
+                    trie.log_metrics_async(x_val.numpy(), y_hat.numpy(), step)
+
+                    continuation = "".join(list(stream_generation(model, tokenizer, max_length=50, temperature=0.7)))
+                    wandb.log({"generated_text": wandb.Html(color_text_html(tokenizer, continuation))}, step=step)
                                 
                 wandb.log({
                     "val_loss": total_val_loss / NUM_VAL_STEPS,
                     "val_perplexity": total_val_perplexity / NUM_VAL_STEPS
                 }, step=step)
+
             model.train()
             step_tqdm.set_description("Training...")
 
@@ -204,6 +204,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train transformer model")
     parser.add_argument("--dataset", type=str, required=True, help="Name of dataset file. Type: .txt")
     parser.add_argument("--config", type=str, required=True, help="Name of the model configuration file. Type: .yaml")
+    parser.add_argument("--ngram_file", type=str, default="ngram", help="Path to ngram file to use for smoothed trie.")
     parser.add_argument("--run_name", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=5)

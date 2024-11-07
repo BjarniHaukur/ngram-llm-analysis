@@ -5,33 +5,15 @@ Be certain python3.12-dev and c compiler are installed (for torch.compile)
 
 ## Setup Instructions
 
-**MacOS / Linux:**
-
+First, install uv:
 ```bash
-python3 -m venv .venv
-source venv/bin/activate
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-**Windows**
+Then running any script with uv will automatically install the dependencies. Optionally, you can install the dependencies yourself with:
 
 ```bash
-python -m venv .venv
-.\venv\Scripts\activate
-```
-
-**Install Dependencies**
-
-With the virtual environment activated, install the project dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Let VSCode install the requirements for running the notebooks.
-
-**CUDA**
-```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+uv sync
 ```
 
 ## Download data
@@ -40,23 +22,17 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 ## RUN
 cd into ngram_llm_analysis/
 
-### Examples
 
-Fit Tokenizer
-```bash
-python3 utils/tokenizer.py cleaned_train --name tokenizer_bytes --vocab_size 16384
-```
+Create Tokenizer
+`uv run utils/tokenizer.py <dataset> --name <tokenizer_name>`
 
 Tokenize Data
-```bash
-python3 utils/dataset.py cleaned_train tokenizer_bytes
-```
+`uv run utils/dataset.py <dataset> <tokenizer_name> --delineate`
 
-Train Transformer
+Build N-Gram Trie
+`uv run utils/ngram.py cleaned_train --tokenizer_name <tokenizer_name> --ngram_file <ngram_file>`
 
-```bash
-python3 train.py --config llama_small --dataset small_train
-```
-
+Using the specialized tokenizer
+`uv run train.py --config llama_small --dataset small_train --tokenizer <tokenizer_name>`
 
 

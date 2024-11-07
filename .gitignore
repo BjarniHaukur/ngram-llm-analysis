@@ -19,7 +19,8 @@ wandb/
 
 # data
 data/*
-checkpoints/*s
+checkpoints/
+!checkpoints/tokenizer/
 
 # ignore pytorch models (just being doubly sure)
 **/*.ckpt
