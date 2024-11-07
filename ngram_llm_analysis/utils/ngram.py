@@ -1,8 +1,5 @@
-import queue
-import threading
 from pathlib import Path
 
-import wandb
 import numpy as np
 from ngram_trie import PySmoothedTrie
 
@@ -16,11 +13,11 @@ CHECKPOINT_PATH = Path(__file__).parent.parent.parent / "checkpoints" / "ngram/"
 CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
 
 
-def formatted_ngram_probs(batch_results:list[list[tuple[str,list[tuple[int,float]]]]])->dict[str,np.ndarray]:  # lol, lmao even
+def formatted_ngram_probs(batch_results:list[list[tuple[str,list[tuple[int,float]]]]], vocab_size:int)->dict[str,np.ndarray]:  # lol, lmao even
     """Converts a batch of outputs from PySmoothedTrie into a dict of 2d arrays (rules -> batch x vocab)"""
     rule_to_probs = {}
 
-    B, V = len(batch_results), len(batch_results[0][0][1])  # assumes valid output from PySmoothedTrie
+    B, V = len(batch_results), vocab_size  # assumes valid output from PySmoothedTrie
 
     for i, result in enumerate(batch_results):
         for rule, rule_probs in result:
@@ -29,6 +26,11 @@ def formatted_ngram_probs(batch_results:list[list[tuple[str,list[tuple[int,float
             for token_idx, prob in rule_probs:
                 rule_to_probs[rule][i][token_idx] = prob
                 
+    # Set zero rows to -1 to indicate invalid probabilities
+    for rule_probs in rule_to_probs.values():
+        zero_rows = (rule_probs == 0).all(axis=1)
+        rule_probs[zero_rows] = -1
+                
     return rule_to_probs
 
 class NGramTrie:  # wrapping the ngram-trie crate
@@ -36,39 +38,13 @@ class NGramTrie:  # wrapping the ngram-trie crate
         self.trie = PySmoothedTrie(max_ngram_length, root_capacity)
         self.trie.load(str(CHECKPOINT_PATH / ngram_file))
         self.max_ngram_length = max_ngram_length
-
-        self.log_queue = queue.Queue()
-        self.max_queue_size_warning_threshold = 10
-        self.worker_thread = threading.Thread(target=self._log_worker)
-        self.worker_thread.daemon = True  # So it exits when the main thread exits
-        self.worker_thread.start()
-
-        wandb.define_metric("async_step")
-        wandb.define_metric("top_1/*", summary="max", step_sync=False)
-        wandb.define_metric("variation_distance/*", summary="max", step_sync=False)
-
-    def _log_worker(self):
-        while True:
-            item = self.log_queue.get()
-            if item is None:
-                break  # Exit the thread
-            tokens, model_p, step = item
-            metrics = self.run_all_metrics(tokens, model_p)
-            wandb.log(metrics, step=step)
-            self.log_queue.task_done()
-
-    def log_metrics_async(self, tokens: np.ndarray, model_p: np.ndarray, step: int):
-        if self.log_queue.qsize() > self.max_queue_size_warning_threshold:
-            print(
-                f"Warning: log_queue size is {self.log_queue.qsize()}, exceeding threshold {self.max_queue_size_warning_threshold}"
-            )
-        self.log_queue.put((tokens, model_p, step))
+        self.vocab_size = root_capacity
 
     def run_all_metrics(self, tokens:np.ndarray, model_p:np.ndarray)->dict[str, float]:
         return {
             **self.all_metrics(tokens, model_p), # important to do this first for caching reasons
-            **self.subgram_metrics(tokens, model_p),
-            **self.suffix_metrics(tokens, model_p),
+            # **self.subgram_metrics(tokens, model_p),
+            # **self.suffix_metrics(tokens, model_p),
             # **self.backoff_metrics(tokens, model_p),
             # ... heatmaps, tables, etc.
         }
@@ -76,8 +52,8 @@ class NGramTrie:  # wrapping the ngram-trie crate
     def calculate_metrics(self, tokens:np.ndarray, model_p:np.ndarray, name:str):
         """Metrics regarding all possible ngram rules, for the currently selected rule set"""
                 
-        probs = [self.trie.get_prediction_probabilities(tokens) for tokens in tokens]
-        probs = formatted_ngram_probs(probs)
+        probs = [self.trie.get_unsmoothed_probabilities(tokens) for tokens in tokens]
+        probs = formatted_ngram_probs(probs, self.vocab_size)
         
         def top_1(i):
             filtered_probs = {r: p for r, p in probs.items() if len(r) <= i}
@@ -85,7 +61,7 @@ class NGramTrie:  # wrapping the ngram-trie crate
                 np.argmax(model_p, axis=1) == np.argmax(p, axis=1)
                 for p in filtered_probs.values()
             ], axis=0)
-            return np.mean(has_argmax_match)
+            return float(np.mean(has_argmax_match))
             
         def variation_distance(i):
             filtered_probs = {r: p for r, p in probs.items() if len(r) <= i}
@@ -93,7 +69,7 @@ class NGramTrie:  # wrapping the ngram-trie crate
                 np.abs(p - model_p).sum(axis=1)
                 for p in filtered_probs.values()
             ], axis=0)
-            return np.mean(smallest_variational_distances)
+            return float(np.mean(smallest_variational_distances))
         
         return {
             **{f"top_1/{name}_{i}": top_1(i) for i in range(1, self.max_ngram_length)},
