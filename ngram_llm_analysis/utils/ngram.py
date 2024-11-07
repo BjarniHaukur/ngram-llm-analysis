@@ -7,29 +7,36 @@ from ngram_trie import PySmoothedTrie
 try: from .dataset import MemmapDataset
 except ImportError: from dataset import MemmapDataset
 
-CHECKPOINT_PATH = Path("../checkpoints/ngram/")
+CHECKPOINT_PATH = Path(__file__).parent.parent.parent / "checkpoints" / "ngram/"
 CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
 
-def formatted_ngram_probs(token_probs:list[tuple[int, list[tuple[str, float]]]])->dict[str, np.ndarray]:
+
+def formatted_ngram_probs(batch_results:list[list[tuple[str,list[tuple[int,float]]]]])->dict[str,np.ndarray]:  # lol, lmao even
+    """Converts a batch of outputs from PySmoothedTrie into a dict of 2d arrays (rules -> batch x vocab)"""
     rule_to_probs = {}
-    
-    for token_idx, rule_probs in token_probs:
-        for rule, prob in rule_probs:
-            rule_to_probs[rule] = rule_to_probs.get(rule, np.zeros(len(token_probs)))
-            rule_to_probs[rule][token_idx] = prob
-            
+
+    B, V = len(batch_results), len(batch_results[0][0][1])  # assumes valid output from PySmoothedTrie
+
+    for i, result in enumerate(batch_results):
+        for rule, rule_probs in result:
+            rule_to_probs[rule] = rule_to_probs.get(rule, np.zeros((B, V)))  # initialize if not present
+
+            for token_idx, prob in rule_probs:
+                rule_to_probs[rule][i][token_idx] = prob
+                
     return rule_to_probs
 
 class NGramTrie:  # wrapping the ngram-trie crate
-    def __init__(self, ngram_file:str, max_ngram_length:int=7):
-        self.trie = PySmoothedTrie.load(CHECKPOINT_PATH / ngram_file)
+    def __init__(self, ngram_file:str, max_ngram_length:int=7, root_capacity:int=2**14):  # 2**14 is the vocab size of the tokenizer
+        self.trie = PySmoothedTrie(max_ngram_length, root_capacity)
+        self.trie.load(str(CHECKPOINT_PATH / ngram_file))
         self.max_ngram_length = max_ngram_length
         
     def run_all_metrics(self, text, logits):
         return {
             **self.all_metrics(text, logits), # important to do this first for caching reasons
-            **self.subgram_metrics(text, logits),
-            **self.suffix_metrics(text, logits),
+            # **self.subgram_metrics(text, logits),
+            # **self.suffix_metrics(text, logits),
             # **self.backoff_metrics(text, logits),
             # ... heatmaps, tables, etc.
         }
@@ -38,12 +45,12 @@ class NGramTrie:  # wrapping the ngram-trie crate
         """Metrics regarding all possible ngram rules, for the currently selected rule set"""
                 
         probs = [self.trie.get_smoothed_probabilities(text) for text in texts]
-        probs = [formatted_ngram_probs(p) for p in probs]
+        probs = formatted_ngram_probs(probs)
         
         def top_1(i):
             filtered_probs = [{r: p for r, p in rule_dict.items() if len(r) <= i} for rule_dict in probs]
             has_argmax_match = [
-                np.any([np.argmax(model_p) == np.argmax(p) for p in rule_dict.values()])
+                np.any([np.argmax(model_p) == np.argmax(ngram_p) for ngram_p in rule_dict.values()])
                 for rule_dict in filtered_probs
             ]
             return np.mean(has_argmax_match)
@@ -51,7 +58,7 @@ class NGramTrie:  # wrapping the ngram-trie crate
         def variation_distance(i):
             filtered_probs = [{r: p for r, p in rule_dict.items() if len(r) <= i} for rule_dict in probs]
             smallest_variational_distances = [
-                np.min([np.abs(p - model_p).sum() for p in rule_dict.values()])
+                np.min([np.abs(ngram_p - model_p).sum() for ngram_p in rule_dict.values()])
                 for rule_dict in filtered_probs
             ]
             return np.mean(smallest_variational_distances)
