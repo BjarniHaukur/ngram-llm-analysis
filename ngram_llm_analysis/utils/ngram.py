@@ -35,6 +35,7 @@ def formatted_ngram_probs(batch_results:list[list[tuple[str,list[tuple[int,float
 
 class NGramTrie:  # wrapping the ngram-trie crate
     def __init__(self, ngram_file:str, max_ngram_length:int=7, root_capacity:int=2**14):  # 2**14 is the vocab size of the tokenizer
+        print(CHECKPOINT_PATH)
         self.trie = PySmoothedTrie(max_ngram_length, root_capacity)
         self.trie.load(str(CHECKPOINT_PATH / ngram_file))
         self.max_ngram_length = max_ngram_length
@@ -100,6 +101,7 @@ if __name__ == "__main__":
     parser.add_argument("dataset_file", type=str)
     parser.add_argument("--tokenizer_name", type=str, default="tokenizer")
     parser.add_argument("--ngram_file", type=str, default="ngram")
+    parser.add_argument("--ngram_size", type=int, default=7)
     
     args = parser.parse_args()
     
@@ -112,10 +114,10 @@ if __name__ == "__main__":
     root_capacity = tokenizer.get_vocab_size()
 
     print(f"Instantiating trie")
-    trie = PySmoothedTrie(n_gram_max_length=7, root_capacity=root_capacity)
+    trie = PySmoothedTrie(n_gram_max_length=args.ngram_size, root_capacity=root_capacity)
     
     print(f"Fitting trie")
-    trie.fit(tokens, n_gram_max_length=7, root_capacity=root_capacity)
+    trie.fit(tokens, n_gram_max_length=args.ngram_size, root_capacity=root_capacity)
     
     print(f"Saving trie to {CHECKPOINT_PATH / args.ngram_file}")
     trie.save(str(CHECKPOINT_PATH / args.ngram_file))
