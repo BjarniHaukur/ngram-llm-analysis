@@ -130,12 +130,14 @@ def main(args):
 
     step_tqdm = tqdm(range(CURRENT_STEP, TOTAL_STEPS), desc="Training...", initial=CURRENT_STEP, total=TOTAL_STEPS)
     for step in step_tqdm:
+        log_step = step * args.batch_size  # log at number of training examples (assume sequence length isn't gonna change)
+
         batch = next(train_dl).to(DEVICE, non_blocking=True)
         x = batch[..., :-1]
         y = batch[..., 1:]
 
         lr = get_lr(step)
-        wandb.log({"learning_rate": lr}, step=step)
+        wandb.log({"learning_rate": lr}, step=log_step)
         for param_group in optim.param_groups: param_group["lr"] = lr
             
         with torch.autocast(device_type=DEVICE, dtype=DTYPE, enabled=DEVICE=="cuda"):
@@ -152,7 +154,7 @@ def main(args):
         wandb.log({
             "train_loss": train_loss,
             "train_perplexity": perplexity
-        }, step=step)
+        }, step=log_step)
         step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
 
         if step % VAL_INTERVAL == 0 and step != 0:
@@ -183,7 +185,6 @@ def main(args):
                 
                 ngram_statistics = trie.run_all_metrics(tokens, model_p)
 
-
                 generated_text = "".join(list(stream_generation(model, tokenizer, max_length=100, temperature=0.7)))
                                 
                 wandb.log({
@@ -191,7 +192,7 @@ def main(args):
                     "val_perplexity": total_val_perplexity / NUM_VAL_STEPS,
                     "generated_text": wandb.Html(color_text_html(tokenizer, generated_text)),
                     **ngram_statistics
-                }, step=step)
+                }, step=log_step)
 
             model.train()
             step_tqdm.set_description("Training...")
