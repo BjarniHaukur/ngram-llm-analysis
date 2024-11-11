@@ -1,5 +1,28 @@
 # Team Diary
 
+## Week 46 (11.11.2024 - 17.11.2024)
+Project Manager: Boti
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+
+### Peer Group Meeting
+- Scheduled for Tuesday
+
+### Supervisor Meeting
+- Scheduled for Thursday
+
+---
+
 ## Week 45 (04.11.2024 - 10.11.2024)
 Project Manager: Jonas
 
@@ -13,7 +36,11 @@ Project Manager: Jonas
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: TBD**
+- **Number of hours this week: 12h**
+1. **Documentation on N-gram Implementation**: Text was developed on the n-gram implementation, utilizing Boti’s notes and code to ensure thorough documentation of all key aspects of the implementation.
+2. **In-depth Study and Analysis of Nguyen's Paper**: An extensive review of Nguyen's paper was conducted to distill and organize each procedural step within his methodology. This work aims to provide a detailed section in the report, outlining Nguyen's approach while highlighting divergences in the current implementation.
+3. **Coordination and Discussion in Meetings**:Organized meetings facilitated discussions on testing results and Nguyen’s outcomes, with analysis centered on result alignment and exploring potential reasons for any discrepancies. These sessions also served as a collaborative space for reviewing project progress and refining strategic approaches.
+4. **Discussion on the Impact of Smoothing**: The implications of excluding smoothing in the n-gram model were evaluated, focusing on how this choice affects model performance and interpretation. This discussion contributes valuable insights to the project’s implementation strategy. 
 
 ### Peer Group Meeting
 - **Smoothing Issues**: Both groups are encountering significant difficulties with smoothing techniques for n-grams, especially given the complexity added by custom rulesets like marginalization.
