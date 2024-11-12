@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import numpy as np
-from ngram_trie import PySmoothedTrie
+import requests
 
 try: from .dataset import MemmapDataset
 except ImportError: from dataset import MemmapDataset
@@ -26,49 +26,59 @@ def formatted_ngram_probs(batch_results:list[list[tuple[str,list[tuple[int,float
             for token_idx, prob in rule_probs:
                 rule_to_probs[rule][i][token_idx] = prob
                 
-    # Set zero rows to -1 to indicate invalid probabilities
-    for rule_probs in rule_to_probs.values():
-        zero_rows = (rule_probs == 0).all(axis=1)
-        rule_probs[zero_rows] = -1
-                
     return rule_to_probs
 
-class NGramTrie:  # wrapping the ngram-trie crate
-    def __init__(self, ngram_file:str, max_ngram_length:int=7, root_capacity:int=2**14):  # 2**14 is the vocab size of the tokenizer
-        print(CHECKPOINT_PATH)
-        self.trie = PySmoothedTrie(max_ngram_length, root_capacity)
-        self.trie.load(str(CHECKPOINT_PATH / ngram_file))
+class NGramTrie:
+    def __init__(self, server_url:str="http://localhost:8080", max_ngram_length:int=7, root_capacity:int=2**14):
+        self.server_url = server_url
         self.max_ngram_length = max_ngram_length
         self.vocab_size = root_capacity
 
     def run_all_metrics(self, tokens:np.ndarray, model_p:np.ndarray)->dict[str, float]:
+        # Get predictions for each sequence in the batch
+        ngram_probs = []
+        for token_seq in tokens:
+            response = requests.post(
+                f"{self.server_url}/predict",
+                json={"history": token_seq.tolist()},
+                headers={"Content-Type": "application/json"}
+            )
+            if response.status_code != 200:
+                raise RuntimeError(f"Server error: {response.text}")
+            ngram_probs.append(response.json()["probabilities"])
+
+        # Rest of the processing remains the same
+        all_probs = formatted_ngram_probs(ngram_probs, self.vocab_size)
+        subgram_probs = {k: v for k, v in all_probs.items() if set(k) == {"+", "-"}}
+        suffix_probs = {k: v for k, v in all_probs.items() if set(k) == {"+"}}
+        
         return {
-            **self.all_metrics(tokens, model_p), # important to do this first for caching reasons
-            # **self.subgram_metrics(tokens, model_p),
-            # **self.suffix_metrics(tokens, model_p),
-            # **self.backoff_metrics(tokens, model_p),
+            **self.calculate_metrics(all_probs, model_p, "all"),
+            **self.calculate_metrics(subgram_probs, model_p, "subgram"),
+            **self.calculate_metrics(suffix_probs, model_p, "suffix"),
             # ... heatmaps, tables, etc.
         }
     
-    def calculate_metrics(self, tokens:np.ndarray, model_p:np.ndarray, name:str):
+    def calculate_metrics(self, ngram_probs:dict[str,np.ndarray], model_p:np.ndarray, name:str):
         """Metrics regarding all possible ngram rules, for the currently selected rule set"""
-                
-        probs = [self.trie.get_unsmoothed_probabilities(tokens) for tokens in tokens]
-        probs = formatted_ngram_probs(probs, self.vocab_size)
-        
+
         def top_1(i):
-            filtered_probs = {r: p for r, p in probs.items() if len(r) <= i}
+            filtered_probs = {r: p for r, p in ngram_probs.items() if len(r) <= i}
+            if len(filtered_probs) == 0:
+                return 0
             has_argmax_match = np.any([
-                np.argmax(model_p, axis=1) == np.argmax(p, axis=1)
-                for p in filtered_probs.values()
+                np.argmax(model_p, axis=1) == np.argmax(ngram_p, axis=1)
+                for ngram_p in filtered_probs.values()
             ], axis=0)
             return float(np.mean(has_argmax_match))
             
         def variation_distance(i):
-            filtered_probs = {r: p for r, p in probs.items() if len(r) <= i}
+            filtered_probs = {r: p for r, p in ngram_probs.items() if len(r) <= i}
+            if len(filtered_probs) == 0:
+                return 0
             smallest_variational_distances = np.min([
-                np.abs(p - model_p).sum(axis=1)
-                for p in filtered_probs.values()
+                np.abs(ngram_p - model_p).sum(axis=1)
+                for ngram_p in filtered_probs.values()
             ], axis=0)
             return float(np.mean(smallest_variational_distances))
         
@@ -76,26 +86,11 @@ class NGramTrie:  # wrapping the ngram-trie crate
             **{f"top_1/{name}_{i}": top_1(i) for i in range(1, self.max_ngram_length)},
             **{f"variation_distance/{name}_{i}": variation_distance(i) for i in range(1, self.max_ngram_length)}
         }
-        
-    def all_metrics(self, tokens:np.ndarray, model_p:np.ndarray):
-        self.trie.set_all_ruleset_by_length(self.max_ngram_length-1)  # -1 for context
-        return self.calculate_metrics(tokens, model_p, "all")
-
-    def subgram_metrics(self, tokens:np.ndarray, model_p:np.ndarray):
-        self.trie.set_subgram_ruleset_by_length(self.max_ngram_length-1)
-        return self.calculate_metrics(tokens, model_p, "subgram")
-    
-    def suffix_metrics(self, tokens:np.ndarray, model_p:np.ndarray)->dict:
-        self.trie.set_suffix_ruleset_by_length(self.max_ngram_length-1)
-        return self.calculate_metrics(tokens, model_p, "suffix")
-    
-    # def backoff_metrics(self, texts:list[str], model_p:np.ndarray)->dict:
-    #     self.trie.set_backoff_ruleset_by_length(self.max_ngram_length-1)
-    #     return self.calculate_metrics(texts, model_p, "backoff")
     
   
 if __name__ == "__main__":
     from argparse import ArgumentParser
+    from ngram_trie import PySmoothedTrie
     
     parser = ArgumentParser()
     parser.add_argument("dataset_file", type=str)

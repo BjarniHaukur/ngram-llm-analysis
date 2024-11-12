@@ -1,7 +1,6 @@
 import math
 import argparse
 from pathlib import Path
-from functools import partial
 
 import yaml
 import wandb
@@ -19,6 +18,7 @@ from utils.sample import stream_generation
 from utils.dataset import MemmapDataset
 from utils.tokenizer import load_tokenizer, color_text_html
 
+np.random.seed(1337)
 torch.random.manual_seed(1337)
 if torch.cuda.is_available(): torch.cuda.manual_seed(1337)
 
@@ -64,11 +64,11 @@ def main(args):
     CURRENT_STEP = 0
     STEPS_PER_EPOCH_TRAIN = len(train_ds) // args.batch_size  # Drop last is True
     TOTAL_STEPS = STEPS_PER_EPOCH_TRAIN * args.epochs
-    VAL_INTERVAL = STEPS_PER_EPOCH_TRAIN // 100
+    VAL_INTERVAL = STEPS_PER_EPOCH_TRAIN // 20  # sacricfice
     NUM_VAL_STEPS = STEPS_PER_EPOCH_TRAIN // VAL_INTERVAL
     WARMUP_STEPS = int(0.03 * TOTAL_STEPS)
 
-    CHECKPOINT_INTERVAL = TOTAL_STEPS // 10
+    CHECKPOINT_INTERVAL = TOTAL_STEPS // 100
 
     def get_lr(step):
         if step < WARMUP_STEPS:  # 1) linear warmup for WARMUP_STEPS steps

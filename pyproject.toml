@@ -19,4 +19,5 @@ dependencies = [
     "accelerate",
     "ipykernel>=6.29.5",
     "ngram-trie>=1.1.6",
+    "requests>=2.32.3",
 ]
