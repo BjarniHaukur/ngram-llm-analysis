@@ -14,9 +14,26 @@ Project Manager: Boti
 
 ### Felix
 - **Number of hours this week: TBD**
+- Meeting with Jonas and Bjarni regarding the draft report and experiments due until then
 
 ### Peer Group Meeting
-- Scheduled for Tuesday
+### Summary of Opponent Group Meeting on N-gram LLM Project
+1. **Experiment Status**
+    - The opposing group will not complete any experiments by Friday, indicating potential challenges with their workflow or approach.
+2. **Approach Differences and Complexity Handling**
+   - **Rule Selection**: The opposing group averages 30 seconds for optimal rule selection in a single context, working with over 600 rules. This method is distinct from our approach, as we use a faster trie implementation, making direct comparisons challenging.
+   - **Smoothing Approach**: Discussion with Johan highlighted that smoothing was omitted by both groups. Nguyen’s work only applies “stupid backoff,” possibly concealing the absence of smoothing, which raises questions about optimal model accuracy and transparency.
+3. **Reimplementation and Dataset Comparisons**
+   - **Nguyen’s Results on TinyStories**: We shared our reimplementation of Nguyen’s work with the other group, achieving identical results on the TinyStories dataset.
+   - **Tiny Textbooks Dataset**: In contrast, applying n-gram prediction on the Tiny Textbooks dataset did not show the same downward trend in accuracy, leading to the hypothesis that such trends propagate only in simpler datasets.
+   - **Next Steps - Wikipedia Dataset**: We plan to test the Wikipedia dataset, which was also used by Nguyen, to investigate if similar trends as with Tiny Textbooks emerge.
+4. **Workflow and Group Comparison**
+   - We have largely moved on to additional experiments and report writing, a progress milestone that the opposing group acknowledges with a degree of “envy.”
+5. **Overfitting and Ground Truth Definitions**
+   - **Overfitting**: Overfitting detection based on n-gram statistics is currently neglected, aligning with Nguyen’s approach, which does not employ n-gram statistics for this purpose.
+   - **Ground Truth Definition**: Differing interpretations of “ground truth” emerged, underscoring a conceptual difference between the groups.
+6. **Interest in Comparative Results**
+   - Bjarni expressed curiosity regarding whether the opposing group will replicate similar findings, especially with the Tiny Textbooks dataset introduced during the meeting.
 
 ### Supervisor Meeting
 - Scheduled for Thursday
