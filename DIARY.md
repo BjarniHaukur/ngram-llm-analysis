@@ -17,7 +17,6 @@ Project Manager: Boti
 - Meeting with Jonas and Bjarni regarding the draft report and experiments due until then
 
 ### Peer Group Meeting
-### Summary of Opponent Group Meeting on N-gram LLM Project
 1. **Experiment Status**
     - The opposing group will not complete any experiments by Friday, indicating potential challenges with their workflow or approach.
 2. **Approach Differences and Complexity Handling**
