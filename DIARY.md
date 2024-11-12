@@ -33,7 +33,8 @@ Project Manager: Jonas
 - **Number of hours this week: TBD**
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 6.5h**
+- Worked on getting unsmoothed N-gram statistics. Implemented unsmoothed with Bjarni. Finally we're gettings some results! :D
 
 ### Felix
 - **Number of hours this week: 12h**
