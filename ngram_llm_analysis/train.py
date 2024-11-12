@@ -32,7 +32,7 @@ def cycle(dl:DataLoader):  # itertools.cycle can causes memory leak with computa
 
 def main(args):
     print("Loading trie...")
-    trie = NGramTrie(args.ngram_file, args.ngram_max_length)
+    trie = NGramTrie(max_ngram_length=args.ngram_max_length)
     print("Trie loaded.")
 
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -211,7 +211,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train transformer model")
     parser.add_argument("--dataset", type=str, required=True, help="Name of dataset file. Type: .txt")
     parser.add_argument("--config", type=str, required=True, help="Name of the model configuration file. Type: .yaml")
-    parser.add_argument("--ngram_file", type=str, default="ngram", help="Path to ngram file to use for smoothed trie.")
     parser.add_argument("--ngram_max_length", type=int, default=7, help="Maximum length of ngrams to use for smoothed trie.")
     parser.add_argument("--run_name", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
