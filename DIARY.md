@@ -35,7 +35,38 @@ Project Manager: Boti
    - Bjarni expressed curiosity regarding whether the opposing group will replicate similar findings, especially with the Tiny Textbooks dataset introduced during the meeting.
 
 ### Supervisor Meeting
-- Scheduled for Thursday
+
+#### Target Audience and Presentation Style
+- **Audience**: Aim for a general audience, especially those not deeply familiar with NLP concepts.
+- **Guidance for Readers**: Present the paper with clarity, making it approachable by including visualizations and explanations.
+- **Introduction**:
+  - Begin with a high-level introduction to N-grams, emphasizing their role as simpler models for next-token prediction.
+  - Mention that N-grams were once state-of-the-art (SOTA) models in token prediction before the advent of more complex models.
+  - Explain how N-grams, despite being an older technique, are still insightful for understanding predictive text modeling.
+
+#### Findings on Curriculum Learning with TinyTextbooks
+- **Curriculum Learning Observations**:
+  - Discuss findings based on the TinyTextbooks dataset.
+  - Note the benefits or limitations observed when applying curriculum learning in this context.
+  
+#### Insights on N-gram Models with Larger N
+- **Diminishing Returns**: 
+  - Highlight that N-grams with \( n > 4 \) show diminishing returns in predictive accuracy.
+  - Suggest that the optimal complexity balance may be at 4-grams.
+- **Comparative Analysis Suggestion**:
+  - Mention the potential interest in comparing smoothed vs. unsmoothed 4-grams.
+  - This comparison could illustrate the impact of smoothing on model performance, especially in light of diminishing returns with higher N.
+
+#### Additional Considerations
+- **Wikipedia Dataset**: 
+  - Noted that Nguyen placed the Wikipedia dataset results in the appendix.
+  - Consider including the Wikipedia dataset results as an appendix in your own work or discussing its implications briefly within the main text.
+
+#### Potential Additions to the Study
+1. **Smoothed vs. Unsmoothened Analysis** for 4-grams:
+   - A comparison could enrich the results and show the practical impact of smoothing at this level.
+2. **Inclusion of Wikipedia Dataset**:
+   - Using Wikipedia as an additional dataset could provide a broader view of model behavior on diverse language corpora.
 
 ---
 
