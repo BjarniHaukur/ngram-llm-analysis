@@ -10,7 +10,8 @@ Project Manager: Boti
 - **Number of hours this week: TBD**
 
 ### Jonas
-- **Number of hours this week: TBD**
+- **Number of hours this week: 7h**
+- Working on the draft report. Especially regarding the results and method. 
 
 ### Felix
 - **Number of hours this week: TBD**
