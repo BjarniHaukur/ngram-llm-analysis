@@ -1,5 +1,28 @@
 # Team Diary
 
+## Week 47 (18.11.2024-24.11.2024)
+Project Manager: Felix
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+
+### Peer Group Meeting
+- *Scheduled for the 19th of November*
+
+### Supervisor Meeting
+- *Cancelled due to unavailability*
+
+---
+
 ## Week 46 (11.11.2024 - 17.11.2024)
 Project Manager: Boti
 
@@ -14,8 +37,10 @@ Project Manager: Boti
 - Working on the draft report. Especially regarding the results and method. 
 
 ### Felix
-- **Number of hours this week: TBD**
+- **Number of hours this week: 12h**
 - Meeting with Jonas and Bjarni regarding the draft report and experiments due until then
+- Writing draft report especially chapters Methodology and Results
+- Organizational stuff in regards to report and ducmentation
 
 ### Peer Group Meeting
 1. **Experiment Status**
