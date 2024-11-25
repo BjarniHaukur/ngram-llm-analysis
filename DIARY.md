@@ -1,5 +1,28 @@
 # Team Diary
 
+## Week 48 (25.11.2024 - 01.12.2024)
+Project Manager: Bjarni
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+
+### Peer Group Meeting
+- *Scheduled for Tuesday, 26th of November*
+
+### Supervisor Meeting
+- *Canceled due to Johan attending a confrence - next meeting scheduled for the 4th of December*
+
+---
+
 ## Week 47 (18.11.2024-24.11.2024)
 Project Manager: Felix
 
@@ -13,7 +36,8 @@ Project Manager: Felix
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: TBD**
+- **Number of hours this week: 0h**
+- No work due to illness
 
 ### Peer Group Meeting
 - *Scheduled for the 19th of November*
