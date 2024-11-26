@@ -16,7 +16,7 @@ Project Manager: Bjarni
 - **Number of hours this week: TBD**
 
 ### Peer Group Meeting
-- *Scheduled for Tuesday, 26th of November*
+- *Cancelled on request by opposing group*
 
 ### Supervisor Meeting
 - *Canceled due to Johan attending a confrence - next meeting scheduled for the 4th of December*
