@@ -13,7 +13,9 @@ Project Manager: Bjarni
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: TBD**
+- **Number of hours this week: 6h**
+- Work on report chapter 4 (methodology section) written and overhauled
+- Create final presentation together with Bjarni and Jonas 
 
 ### Peer Group Meeting
 - *Cancelled on request by opposing group*
