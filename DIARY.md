@@ -28,6 +28,10 @@ Project Manager: Felix
 
 ### Bjarni
 - **Number of hours this week: TBD**
+- Downloaded and cleaned the Wikipedia dataset
+- Did "binary search" to find how large of a dataset we can handle
+- Fit ngram tries of different sizes
+- Found that wikipedia has way more variance and therefore more nodes -> CPU bottleneck even sooner
 
 ### Boti
 - **Number of hours this week: TBD**
@@ -52,6 +56,8 @@ Project Manager: Boti
 
 ### Bjarni
 - **Number of hours this week: TBD**
+- Found performance gains in not using the Python package and instead opting for a Rust HTTP server
+- Repurposed some of the code to make HTTP calls instead on both the rust and python side
 
 ### Boti
 - **Number of hours this week: TBD**
@@ -125,6 +131,7 @@ Project Manager: Jonas
 
 ### Bjarni
 - **Number of hours this week: TBD**
+- Realizing that even though we can project the memory usage for a certain size of dataset, at a certain point our CPU becomes the bottleneck.
 
 ### Boti
 - **Number of hours this week: TBD**
@@ -154,7 +161,7 @@ Project Manager: Jonas
 Project Manager: Felix
 
 ### Bjarni
-- **Number of hours this week: TBD**
+- **Number of hours this week: 8**
 - Met with Felix and Boti, did some work on the ngram statistics
 - Debugging the ngram trie implementation
 - Calculating the metrics for the ngram trie
