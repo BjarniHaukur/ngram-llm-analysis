@@ -66,7 +66,7 @@ class NGramTrie:
         top_10_probs = []
         for token_seq, top_10_rules in zip(tokens, top_10_rules):
             response = requests.post(
-                f"{self.server_url}/unsmoothed_predict",
+                f"{self.server_url}/smoothed_predict",
                 json={"history": token_seq.tolist(), "rules": top_10_rules.tolist()},
                 headers={"Content-Type": "application/json"}
             )
