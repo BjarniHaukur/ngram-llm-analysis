@@ -31,7 +31,8 @@ Project Manager: Bjarni
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 1**
+- Keeping up with the project, but no new work
 
 ### Jonas
 - **Number of hours this week: TBD**
@@ -56,7 +57,8 @@ Project Manager: Felix
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 0**
+- On a trip
 
 ### Jonas
 - **Number of hours this week: TBD**
@@ -80,7 +82,8 @@ Project Manager: Boti
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 0**
+- No new work
 
 ### Jonas
 - **Number of hours this week: 7h**
@@ -153,7 +156,9 @@ Project Manager: Jonas
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 10**
+- Tried to implement Stupid Backoff smoothing, but it was too slow as well
+- Tried restructuring the calculation of the smoothed rules, but no improvement were made (need to revert back to the old version)
 
 ### Jonas
 - **Number of hours this week: 6.5h**
@@ -187,7 +192,7 @@ Project Manager: Felix
 - Do so in a separate process, so it doesn't block the training loop
 
 ### Boti
-- **Number of hours this week: 8+**
+- **Number of hours this week: 10**
 - Some bugs were found in the ngram trie implementation, wrong cache initialization, division by zero in some cases
 - Fixed the bugs
 - Created subset functions for ruleset calculations, so we can calculate rules for suffix and subgram rulesets
