@@ -1,5 +1,29 @@
 # Team Diary
 
+## Week 49 (02.12.2024 - 08.12.2024)
+Project Manager: Jonas
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: TBD**
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: TBD**
+- Working on the report chapter 7 (opposing group discussion)
+
+### Peer Group Meeting
+- *Cancled on request by opposing group*
+
+### Supervisor Meeting
+- *Scheduled for Wednesday December 4th*
+
+---
+
 ## Week 48 (25.11.2024 - 01.12.2024)
 Project Manager: Bjarni
 
@@ -42,7 +66,7 @@ Project Manager: Felix
 - No work due to illness
 
 ### Peer Group Meeting
-- *Scheduled for the 19th of November*
+- Short Meeting - explaining expected results
 
 ### Supervisor Meeting
 - *Cancelled due to unavailability*
