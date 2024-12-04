@@ -1,7 +1,7 @@
 # Team Diary
 
-## Week 48 (25.11.2024 - 01.12.2024)
-Project Manager: Bjarni
+## Week 49 (02.12.2024 - 08.12.2024)
+Project Manager: Jonas
 
 ### Bjarni
 - **Number of hours this week: TBD**
@@ -14,6 +14,33 @@ Project Manager: Bjarni
 
 ### Felix
 - **Number of hours this week: TBD**
+- Working on the report chapter 7 (opposing group discussion)
+
+### Peer Group Meeting
+- *Cancled on request by opposing group*
+
+### Supervisor Meeting
+- *Scheduled for Wednesday December 4th*
+
+---
+
+## Week 48 (25.11.2024 - 01.12.2024)
+Project Manager: Bjarni
+
+### Bjarni
+- **Number of hours this week: TBD**
+
+### Boti
+- **Number of hours this week: 1**
+- Keeping up with the project, but no new work
+
+### Jonas
+- **Number of hours this week: TBD**
+
+### Felix
+- **Number of hours this week: 6h**
+- Work on report chapter 4 (methodology section) written and overhauled
+- Create final presentation together with Bjarni and Jonas 
 
 ### Peer Group Meeting
 - *Cancelled on request by opposing group*
@@ -34,7 +61,8 @@ Project Manager: Felix
 - Found that wikipedia has way more variance and therefore more nodes -> CPU bottleneck even sooner
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 0**
+- On a trip
 
 ### Jonas
 - **Number of hours this week: TBD**
@@ -44,7 +72,7 @@ Project Manager: Felix
 - No work due to illness
 
 ### Peer Group Meeting
-- *Scheduled for the 19th of November*
+- Short Meeting - explaining expected results
 
 ### Supervisor Meeting
 - *Cancelled due to unavailability*
@@ -60,7 +88,8 @@ Project Manager: Boti
 - Repurposed some of the code to make HTTP calls instead on both the rust and python side
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 0**
+- No new work
 
 ### Jonas
 - **Number of hours this week: 7h**
@@ -134,7 +163,9 @@ Project Manager: Jonas
 - Realizing that even though we can project the memory usage for a certain size of dataset, at a certain point our CPU becomes the bottleneck.
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 10**
+- Tried to implement Stupid Backoff smoothing, but it was too slow as well
+- Tried restructuring the calculation of the smoothed rules, but no improvement were made (need to revert back to the old version)
 
 ### Jonas
 - **Number of hours this week: 6.5h**
@@ -168,7 +199,7 @@ Project Manager: Felix
 - Do so in a separate process, so it doesn't block the training loop
 
 ### Boti
-- **Number of hours this week: 8+**
+- **Number of hours this week: 10**
 - Some bugs were found in the ngram trie implementation, wrong cache initialization, division by zero in some cases
 - Fixed the bugs
 - Created subset functions for ruleset calculations, so we can calculate rules for suffix and subgram rulesets
