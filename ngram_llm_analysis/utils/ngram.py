@@ -39,7 +39,7 @@ class NGramTrie:
         ngram_probs = []
         for token_seq in tokens:
             response = requests.post(
-                f"{self.server_url}/predict",
+                f"{self.server_url}/unsmoothed_predict",
                 json={"history": token_seq.tolist()},
                 headers={"Content-Type": "application/json"}
             )
@@ -52,10 +52,35 @@ class NGramTrie:
         subgram_probs = {k: v for k, v in all_probs.items() if set(k) == {"+", "-"}}
         suffix_probs = {k: v for k, v in all_probs.items() if set(k) == {"+"}}
         
+        # due to the computational complexity of calculating smoothed matrics, we only use the top 10 rules based on unsmoothed variation distance
+        distances = [
+            (rule, np.abs(ngram_p - model_p).sum(axis=1))  # (rule, batch of distances)
+            for rule, ngram_p in all_probs.items()
+        ]
+        
+        distance_matrix = np.stack([d for _, d in distances], axis=0)  # (n_rules, batch_size)
+        # Get top 10 rules with smallest distances for each batch
+        top_10_indices = np.argsort(distance_matrix, axis=0)[:10]  # (10, batch_size)
+        top_10_rules = np.array([distances[i][0] for i in top_10_indices]).T  # (batch_size, 10)
+        
+        top_10_probs = []
+        for token_seq, top_10_rules in zip(tokens, top_10_rules):
+            response = requests.post(
+                f"{self.server_url}/unsmoothed_predict",
+                json={"history": token_seq.tolist(), "rules": top_10_rules.tolist()},
+                headers={"Content-Type": "application/json"}
+            )
+            if response.status_code != 200:
+                raise RuntimeError(f"Server error: {response.text}")
+            top_10_probs.append(response.json()["probabilities"])
+            
+        top_10_probs = formatted_ngram_probs(top_10_probs, self.vocab_size)
+            
         return {
             **self.calculate_metrics(all_probs, model_p, "all"),
             **self.calculate_metrics(subgram_probs, model_p, "subgram"),
             **self.calculate_metrics(suffix_probs, model_p, "suffix"),
+            **self.calculate_metrics(top_10_probs, model_p, "smoothed_top_10"),
             # ... heatmaps, tables, etc.
         }
     
@@ -64,8 +89,8 @@ class NGramTrie:
 
         def top_1(i):
             filtered_probs = {r: p for r, p in ngram_probs.items() if len(r) <= i}
-            if len(filtered_probs) == 0:
-                return 0
+            if len(filtered_probs) == 0: return 0
+            
             has_argmax_match = np.any([
                 np.argmax(model_p, axis=1) == np.argmax(ngram_p, axis=1)
                 for ngram_p in filtered_probs.values()
@@ -74,8 +99,8 @@ class NGramTrie:
             
         def variation_distance(i):
             filtered_probs = {r: p for r, p in ngram_probs.items() if len(r) <= i}
-            if len(filtered_probs) == 0:
-                return 0
+            if len(filtered_probs) == 0: return 0
+            
             smallest_variational_distances = np.min([
                 np.abs(ngram_p - model_p).sum(axis=1)
                 for ngram_p in filtered_probs.values()
