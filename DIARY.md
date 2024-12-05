@@ -13,14 +13,18 @@ Project Manager: Jonas
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: TBD**
-- Working on the report chapter 7 (opposing group discussion)
+- **Number of hours this week: 8h**
+- Working on the report chapter 7 (opposing group discussion) and the results and experiment part - I finished the report with the results we have to this day
+- Work on the final presentation 
 
 ### Peer Group Meeting
 - *Cancled on request by opposing group*
 
 ### Supervisor Meeting
-- *Scheduled for Wednesday December 4th*
+- **State of the Report:** We presented the current progress of our report, emphasizing that it is nearly complete except for the inclusion of any additional experiments on further datasets
+- **Presentation Formalities:** We discussed potential questions regarding the presentation and deliberated on how to structure and emphasize the key focus areas.
+- **Additional Experiments:** We proposed conducting experiments on the Wikipedia dataset; however, due to CPU limitations, significant pruning of the model would be required. Additionally, Boti suggested measuring performance on a Hungarian dataset, as the Hungarian language’s complexity, particularly with its use of compound words, offers a unique challenge.
+- **Annotations on Nguyen’s Work:** We reviewed the limitations of Nguyen’s implementation and discussed how some of these may have been obscured in his work. Bjarni suggested reaching out to Nguyen via email to inquire further about these issues.
 
 ---
 
