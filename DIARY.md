@@ -13,7 +13,7 @@ Project Manager: Jonas
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: 8h**
+- **Number of hours this week: 10h**
 - Working on the report chapter 7 (opposing group discussion) and the results and experiment part - I finished the report with the results we have to this day
 - Work on the final presentation 
 
@@ -42,7 +42,7 @@ Project Manager: Bjarni
 - **Number of hours this week: TBD**
 
 ### Felix
-- **Number of hours this week: 6h**
+- **Number of hours this week: 8h**
 - Work on report chapter 4 (methodology section) written and overhauled
 - Create final presentation together with Bjarni and Jonas 
 
@@ -100,7 +100,7 @@ Project Manager: Boti
 - Working on the draft report. Especially regarding the results and method. 
 
 ### Felix
-- **Number of hours this week: 12h**
+- **Number of hours this week: 18h**
 - Meeting with Jonas and Bjarni regarding the draft report and experiments due until then
 - Writing draft report especially chapters Methodology and Results
 - Organizational stuff in regards to report and ducmentation
@@ -176,7 +176,7 @@ Project Manager: Jonas
 - Worked on getting unsmoothed N-gram statistics. Implemented unsmoothed with Bjarni. Finally we're gettings some results! :D
 
 ### Felix
-- **Number of hours this week: 12h**
+- **Number of hours this week: 15h**
 1. **Documentation on N-gram Implementation**: Text was developed on the n-gram implementation, utilizing Boti’s notes and code to ensure thorough documentation of all key aspects of the implementation.
 2. **In-depth Study and Analysis of Nguyen's Paper**: An extensive review of Nguyen's paper was conducted to distill and organize each procedural step within his methodology. This work aims to provide a detailed section in the report, outlining Nguyen's approach while highlighting divergences in the current implementation.
 3. **Coordination and Discussion in Meetings**:Organized meetings facilitated discussions on testing results and Nguyen’s outcomes, with analysis centered on result alignment and exploring potential reasons for any discrepancies. These sessions also served as a collaborative space for reviewing project progress and refining strategic approaches.
@@ -216,7 +216,7 @@ Project Manager: Felix
 - worked on top1 accuracy. Integrating the ngram and transformer predictions. Tried to understand what is sought after in terms of the metrics. Thoughts regarding what sentences/contexts should be given to the calculations. 
 
 ### Felix
-- **Number of hours this week: 8h**
+- **Number of hours this week: 12h**
 - **Experiment Analysis (Nguyen’s Work)**  
   - Analyzed Nguyen's experimental setups, focusing on parameter choices (e.g., smoothing, sequence steps).
   - Documented insights for aligning our approach and identifying gaps
@@ -302,7 +302,7 @@ Project Manager: Boti
 - Initialized ngram integration
 
 ### Felix
-- **Number of hours this week: 6h**
+- **Number of hours this week: 8h**
 - Worked on the report: wrote the introduction (context and objectives), problem description (overall scope of the project), and related work (summary and evaluation of relevant studies).
 - Revised Nguyen's cited literature for better alignment and accuracy.
 - Reviewed previously collected literature for additional insights - I used my notes to write the report in a detailed and sophiticated way
@@ -364,7 +364,7 @@ Project Manager: Bjarni
 - Midterm report improvement. Adding substance to the report by integrating Bjarni's valuable comments on Felix's draft.
 
 ### Felix
-- **Number of hours this week: 8h**
+- **Number of hours this week: 9h**
 - Conducted an **in-depth review of n-gram statistics**, analyzing key patterns and metrics for future experiments
 - **Summarized meetings** and structured previous work, ensuring the project’s progression remained clear and organized, while synthesizing important discussions for future reference.
 - **Authored the midterm report**, compiling critical findings and documenting the project’s current status, methodologies, and next steps, ensuring clarity and cohesion in communication.
@@ -466,7 +466,7 @@ Project Manager: Jonas
 - Setting up a server using Google Cloud. Struggled for some time to open up the firewall. Managed to do so after a while. 
 
 ### Felix
-- **Number of hours this week: 8h**
+- **Number of hours this week: 10h**
 
 #### 1. **Google Cloud Architecture Preparation**:
    - Set up and configure cloud infrastructure to support the n-gram model deployment.
@@ -537,7 +537,7 @@ Project Manager: Felix
   - Fixed training loop so that it is easier to run. Dependencies such as dataset, tokenizer had to be initialized with `dataset.py` and `tokenizer.py`. Now its simple to use described in [README](README.md). [Commit](https://github.com/BjarniHaukur/ngram-llm-analysis/commit/565726f8a64bfb1f143299bdfdbabf6181d16bc9)
 
 ### Felix
-- **Number of hours this week: 10h**
+- **Number of hours this week: 11h**
 - Explored Google Cloud resources, focusing on NVIDIA A100 GPU and cost-saving strategies, including the free trial and $50 team coupons.
 - Reviewed the ngram model and database solution, ensuring alignment with project goals and fit with Google Cloud
 - Prepared project reports and documentation, summarizing key findings and strategies for the team’s next steps.
@@ -610,7 +610,7 @@ Project Manager: Boti
   - Ngrams visualization. Visualize the ngrams generated. Failed to visualize the rules
 
 ### Felix
-- **Number of hours this week: 6**
+- **Number of hours this week: 8h**
 - **Transformer Research:** Studied key papers on transformer architectures using Web of Science to enhance our theoretical foundation, focusing on n-gram statistics.
 - **Practical Insights:** Watched the lecture "**Let's Build ChatGPT from Scratch**" to gain applicable insights into transformer implementation.
 - **Documentation and Coordination:** Organized reports, documented progress, and coordinated group activities to improve collaboration.
@@ -736,7 +736,7 @@ Project Manager: Bjarni
       - realized that it was quite outdated and had incompatibility issues with M1 chips.
 
 ### Felix
-- **Number of hours this week: 8**
+- **Number of hours this week: 10h**
 1. Literature Review on Transformer Models and N-gram Statistics
 I conducted an in-depth literature review on transformer models, with a particular emphasis on their relationship with n-gram statistics. This involved analyzing recent research papers, articles, and case studies to understand how n-gram approaches are integrated within transformer architectures. The objective was to identify methodologies that could enhance our project's performance by incorporating these statistical techniques.
 2. Attempting to Run an N-gram Statistics GitHub Library on MacBook
