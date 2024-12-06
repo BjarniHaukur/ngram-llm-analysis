@@ -13,10 +13,7 @@ if [ ! -f "$input_file" ]; then
     exit 1
 fi
 
-
 target_size=$((1024 * 1024 * 1024)) # 1GB in bytes
-
-
 sample_size=10000
 
 # We'll take three samples:
@@ -34,13 +31,10 @@ offset_end=$(( (total_bytes * 3) / 4 )) # 3/4 into the file
 
 echo "Estimating average word size..."
 
-# Function to measure average word size from a given offset
 measure_avg_word_size() {
     local offset="$1"
     local tmpfile
     tmpfile=$(mktemp)
-    # Extract a chunk starting at 'offset' to get ~ sample_size words
-    # We'll read sample_size*10 bytes just as a heuristic
     dd if="$input_file" bs=1 skip="$offset" count=$((sample_size * 10)) 2>/dev/null \
         | awk '{for(i=1; i<=NF; i++) print $i}' \
         | head -n "$sample_size" > "$tmpfile"
@@ -51,25 +45,19 @@ measure_avg_word_size() {
     local wordcount
     wordcount=$(wc -l < "$tmpfile")
     if [ "$wordcount" -eq 0 ]; then
-        # If we couldn't get any words, return 0 to indicate failure
         rm "$tmpfile"
         echo 0
         return
     fi
 
-    # Compute average word size as floating-point
-    # We'll just print the floating result and let caller handle it
     awk -v total_bytes="$bytes" -v total_words="$wordcount" 'BEGIN {print total_bytes / total_words}' "$tmpfile"
-
     rm "$tmpfile"
 }
 
-# Measure three samples
 avg_word_size_start=$(measure_avg_word_size 0)
 avg_word_size_mid=$(measure_avg_word_size "$offset_mid")
 avg_word_size_end=$(measure_avg_word_size "$offset_end")
 
-# Filter out any zeros (failed samples)
 samples=()
 [ "$(printf '%.0f' "$avg_word_size_start")" -gt 0 ] && samples+=("$avg_word_size_start")
 [ "$(printf '%.0f' "$avg_word_size_mid")" -gt 0 ] && samples+=("$avg_word_size_mid")
@@ -80,14 +68,12 @@ if [ "${#samples[@]}" -eq 0 ]; then
     exit 1
 fi
 
-# Average the samples
 sum=0
 for s in "${samples[@]}"; do
     sum=$(awk -v a="$sum" -v b="$s" 'BEGIN {print a+b}')
 done
 avg_word_size=$(awk -v s="$sum" -v c="${#samples[@]}" 'BEGIN {print s/c}')
 
-# Compute estimated number of words
 estimated_words=$(awk -v tgt="$target_size" -v avg="$avg_word_size" 'BEGIN {
     if (avg > 0) print int(tgt / avg); else print 0
 }')
@@ -100,11 +86,14 @@ awk -v max_words="$estimated_words" '
     for (i=1; i<=NF; i++) {
         count++
         if (count <= max_words) {
-            print $i
+            printf("%s ", $i)
         } else {
             exit
         }
     }
+}
+END {
+    print ""
 }' "$input_file" > "$output_file"
 
 echo "Extraction complete. Output saved to '$output_file'."
