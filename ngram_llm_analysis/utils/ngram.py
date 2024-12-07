@@ -112,7 +112,8 @@ if __name__ == "__main__":
     parser.add_argument("dataset_file", type=str)
     parser.add_argument("--tokenizer_name", type=str, default="tokenizer")
     parser.add_argument("--ngram_file", type=str, default="ngram")
-    parser.add_argument("--ngram_size", type=int, default=7)
+    parser.add_argument("--ngram_size", type=int, default=8)
+    parser.add_argument("--smoothing_name", type=str, default="modified_kneser_ney")
     
     args = parser.parse_args()
     
@@ -125,10 +126,10 @@ if __name__ == "__main__":
     root_capacity = tokenizer.get_vocab_size()
 
     print(f"Instantiating trie")
-    trie = PySmoothedTrie(n_gram_max_length=args.ngram_size, root_capacity=root_capacity)
+    trie = PySmoothedTrie(n_gram_max_length=args.ngram_size, root_capacity=root_capacity, smoothing_name=args.smoothing_name)
     
     print(f"Fitting trie")
-    trie.fit(tokens, n_gram_max_length=args.ngram_size, root_capacity=root_capacity)
+    trie.fit(tokens, n_gram_max_length=args.ngram_size, root_capacity=root_capacity, smoothing_name=args.smoothing_name)
     
     print(f"Saving trie to {CHECKPOINT_PATH / args.ngram_file}")
     trie.save(str(CHECKPOINT_PATH / args.ngram_file))

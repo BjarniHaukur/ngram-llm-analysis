@@ -122,7 +122,7 @@ if __name__ == "__main__":
     parser.add_argument("data_name", type=str)
     parser.add_argument("--name", type=str, default="tokenizer")
     parser.add_argument("--chunk_size", type=int, default=1024**2, help="Number of lines to process at a time")
-    parser.add_argument("--vocab_size", type=int, default=8192)
+    parser.add_argument("--vocab_size", type=int, default=16384)
     args = parser.parse_args()
 
     build_tokenizer(args.data_name, args.name, args.vocab_size, args.chunk_size)
