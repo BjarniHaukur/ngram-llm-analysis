@@ -13,7 +13,7 @@ CHECKPOINT_PATH = Path(__file__).parent.parent.parent / "checkpoints" / "ngram/"
 CHECKPOINT_PATH.mkdir(parents=True, exist_ok=True)
 
 
-def formatted_ngram_probs(batch_results:list[list[tuple[str,list[tuple[int,float]]]]], vocab_size:int)->dict[str,np.ndarray]:  # lol, lmao even
+def formatted_ngram_probs(batch_results:list[list[tuple[str,list[float]]]], vocab_size:int)->dict[str,np.ndarray]:  # lol, lmao even
     """Converts a batch of outputs from PySmoothedTrie into a dict of 2d arrays (rules -> batch x vocab)"""
     rule_to_probs = {}
 
@@ -22,9 +22,7 @@ def formatted_ngram_probs(batch_results:list[list[tuple[str,list[tuple[int,float
     for i, result in enumerate(batch_results):
         for rule, rule_probs in result:
             rule_to_probs[rule] = rule_to_probs.get(rule, np.zeros((B, V)))  # initialize if not present
-
-            for token_idx, prob in rule_probs:
-                rule_to_probs[rule][i][token_idx] = prob
+            rule_to_probs[rule][i] = rule_probs  # fill in the probabilities
                 
     return rule_to_probs
 
