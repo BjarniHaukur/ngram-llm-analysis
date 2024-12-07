@@ -34,7 +34,7 @@ class NGramTrie:
 
     def run_all_metrics(self, tokens:np.ndarray, model_p:np.ndarray)->dict[str, float]:
         # Get predictions for each sequence in the batch
-        ngram_probs = []
+        unsmoothed_ngram_probs = []
         for token_seq in tokens:
             response = requests.post(
                 f"{self.server_url}/unsmoothed_predict",
@@ -43,42 +43,35 @@ class NGramTrie:
             )
             if response.status_code != 200:
                 raise RuntimeError(f"Server error: {response.text}")
-            ngram_probs.append(response.json()["probabilities"])
+            unsmoothed_ngram_probs.append(response.json()["probabilities"])
 
         # Rest of the processing remains the same
-        all_probs = formatted_ngram_probs(ngram_probs, self.vocab_size)
-        subgram_probs = {k: v for k, v in all_probs.items() if set(k) == {"+", "-"}}
-        suffix_probs = {k: v for k, v in all_probs.items() if set(k) == {"+"}}
+        unsmoothed_all_probs = formatted_ngram_probs(unsmoothed_ngram_probs, self.vocab_size)
+        unsmoothed_subgram_probs = {k: v for k, v in unsmoothed_all_probs.items() if set(k) == {"+", "-"}}
+        unsmoothed_suffix_probs = {k: v for k, v in unsmoothed_all_probs.items() if set(k) == {"+"}}
         
-        # due to the computational complexity of calculating smoothed matrics, we only use the top 10 rules based on unsmoothed variation distance
-        distances = [
-            (rule, np.abs(ngram_p - model_p).sum(axis=1))  # (rule, batch of distances)
-            for rule, ngram_p in all_probs.items()
-        ]
-        
-        distance_matrix = np.stack([d for _, d in distances], axis=0)  # (n_rules, batch_size)
-        # Get top 10 rules with smallest distances for each batch
-        top_10_indices = np.argsort(distance_matrix, axis=0)[:10]  # (10, batch_size)
-        top_10_rules = np.array([distances[i][0] for i in top_10_indices]).T  # (batch_size, 10)
-        
-        top_10_probs = []
-        for token_seq, top_10_rules in zip(tokens, top_10_rules):
+        smoothed_ngram_probs = []
+        for token_seq in tokens:
             response = requests.post(
                 f"{self.server_url}/smoothed_predict",
-                json={"history": token_seq.tolist(), "rules": top_10_rules.tolist()},
+                json={"history": token_seq.tolist()},
                 headers={"Content-Type": "application/json"}
             )
             if response.status_code != 200:
                 raise RuntimeError(f"Server error: {response.text}")
-            top_10_probs.append(response.json()["probabilities"])
+            smoothed_ngram_probs.append(response.json()["probabilities"])
             
-        top_10_probs = formatted_ngram_probs(top_10_probs, self.vocab_size)
-            
+        smoothed_all_probs = formatted_ngram_probs(smoothed_ngram_probs, self.vocab_size)
+        smoothed_subgram_probs = {k: v for k, v in smoothed_all_probs.items() if set(k) == {"+", "-"}}
+        smoothed_suffix_probs = {k: v for k, v in smoothed_all_probs.items() if set(k) == {"+"}}
+        
         return {
-            **self.calculate_metrics(all_probs, model_p, "all"),
-            **self.calculate_metrics(subgram_probs, model_p, "subgram"),
-            **self.calculate_metrics(suffix_probs, model_p, "suffix"),
-            **self.calculate_metrics(top_10_probs, model_p, "smoothed_top_10"),
+            **self.calculate_metrics(unsmoothed_all_probs, model_p, "unsmoothed_all"),
+            **self.calculate_metrics(unsmoothed_subgram_probs, model_p, "unsmoothed_subgram"),
+            **self.calculate_metrics(unsmoothed_suffix_probs, model_p, "unsmoothed_suffix"),
+            **self.calculate_metrics(smoothed_all_probs, model_p, "smoothed_all"),
+            **self.calculate_metrics(smoothed_subgram_probs, model_p, "smoothed_subgram"),
+            **self.calculate_metrics(smoothed_suffix_probs, model_p, "smoothed_suffix"),
             # ... heatmaps, tables, etc.
         }
     
