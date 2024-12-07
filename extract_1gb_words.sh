@@ -81,6 +81,9 @@ estimated_words=$(awk -v tgt="$target_size" -v avg="$avg_word_size" 'BEGIN {
 echo "Estimated words for 1GB: $estimated_words"
 echo "Extracting words..."
 
+# Print a new line at the beginning of the output file
+echo "" > "$output_file"
+
 awk -v max_words="$estimated_words" '
 {
     for (i=1; i<=NF; i++) {
@@ -94,6 +97,6 @@ awk -v max_words="$estimated_words" '
 }
 END {
     print ""
-}' "$input_file" > "$output_file"
+}' "$input_file" >> "$output_file"
 
 echo "Extraction complete. Output saved to '$output_file'."
