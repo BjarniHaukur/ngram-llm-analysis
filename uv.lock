@@ -618,7 +618,7 @@ requires-dist = [
     { name = "ipykernel" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "matplotlib" },
-    { name = "ngram-trie", specifier = ">=1.1.6" },
+    { name = "ngram-trie", specifier = ">=1.1.8" },
     { name = "numpy" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "tokenizers" },
@@ -632,11 +632,11 @@ requires-dist = [
 
 [[package]]
 name = "ngram-trie"
-version = "1.1.6"
+version = "1.1.8"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d7/57/70488e25480b6fe8f749812bce6801f8454f3efc6f30493433023fe991b0/ngram_trie-1.1.6.tar.gz", hash = "sha256:553b8dd0656098cdecf7437c6c1c4e230dc672fd8b876ea4397c86ce95c51a1e", size = 31106 }
+sdist = { url = "https://files.pythonhosted.org/packages/f2/1e/70bbcf3578303f52c249f868431309067dd7d2d386e5ec0cb96295daaf84/ngram_trie-1.1.8.tar.gz", hash = "sha256:ab564d6394fec6d43f4932720d9c2234900847daf5339801061d92fc0901252a", size = 32732 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ce/eb/ce2841d695e3755551ab4239c988d261198974626ed55d087b8d908c52f6/ngram_trie-1.1.6-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:2060bdaa5fece3acdcc51da639d423cbc90e1af318f950fde4ee9852b4addbdb", size = 625298 },
+    { url = "https://files.pythonhosted.org/packages/65/03/21629cc815b6a7b1b75c14e50626d6374b2a87e287d2b9950d130578b223/ngram_trie-1.1.8-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:dbd74ff4a81936a8cc14eafc5a05a9106a1149765123387ae0d7146683c66642", size = 663900 },
 ]
 
 [[package]]
@@ -885,8 +885,6 @@ version = "6.0.0"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/18/c7/8c6872f7372eb6a6b2e4708b88419fb46b857f7a2e1892966b851cc79fc9/psutil-6.0.0.tar.gz", hash = "sha256:8faae4f310b6d969fa26ca0545338b21f73c6b15db7c4a8d934a5482faa818f2", size = 508067 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c5/66/78c9c3020f573c58101dc43a44f6855d01bbbd747e24da2f0c4491200ea3/psutil-6.0.0-cp27-none-win32.whl", hash = "sha256:02b69001f44cc73c1c5279d02b30a817e339ceb258ad75997325e0e6169d8b35", size = 249766 },
-    { url = "https://files.pythonhosted.org/packages/e1/3f/2403aa9558bea4d3854b0e5e567bc3dd8e9fbc1fc4453c0aa9aafeb75467/psutil-6.0.0-cp27-none-win_amd64.whl", hash = "sha256:21f1fb635deccd510f69f485b87433460a603919b45e2a324ad65b0cc74f8fb1", size = 253024 },
     { url = "https://files.pythonhosted.org/packages/0b/37/f8da2fbd29690b3557cca414c1949f92162981920699cd62095a984983bf/psutil-6.0.0-cp36-abi3-macosx_10_9_x86_64.whl", hash = "sha256:c588a7e9b1173b6e866756dde596fd4cad94f9399daf99ad8c3258b3cb2b47a0", size = 250961 },
     { url = "https://files.pythonhosted.org/packages/35/56/72f86175e81c656a01c4401cd3b1c923f891b31fbcebe98985894176d7c9/psutil-6.0.0-cp36-abi3-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:6ed2440ada7ef7d0d608f20ad89a04ec47d2d3ab7190896cd62ca5fc4fe08bf0", size = 287478 },
     { url = "https://files.pythonhosted.org/packages/19/74/f59e7e0d392bc1070e9a70e2f9190d652487ac115bb16e2eff6b22ad1d24/psutil-6.0.0-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5fd9a97c8e94059b0ef54a7d4baf13b405011176c3b6ff257c247cae0d560ecd", size = 290455 },

@@ -32,7 +32,7 @@ def cycle(dl:DataLoader):  # itertools.cycle can causes memory leak with computa
 
 def main(args):
     print("Loading trie...")
-    trie = NGramTrie(max_ngram_length=args.ngram_max_length)
+    trie = NGramTrie(max_ngram_length=args.ngram_max_length, root_capacity=2**14)
     print("Trie loaded.")
 
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -157,7 +157,7 @@ def main(args):
         }, step=log_step)
         step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
 
-        if step % VAL_INTERVAL == 0 and step != 0:
+        if step % VAL_INTERVAL == 0:
             model.eval()
             step_tqdm.set_description("Validating...")
             with torch.no_grad():
@@ -180,8 +180,8 @@ def main(args):
                     step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
 
                 n_context = args.ngram_max_length - 1
-                tokens = x_val[..., -n_context:].cpu().numpy()
-                model_p = F.softmax(y_hat[:, -1, :], dim=-1).cpu().numpy()
+                tokens = x_val[:8, -n_context:].cpu().numpy()
+                model_p = F.softmax(y_hat[:8, -1, :], dim=-1).cpu().numpy()
                 
                 ngram_statistics = trie.run_all_metrics(tokens, model_p)
 

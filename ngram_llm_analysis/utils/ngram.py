@@ -60,20 +60,24 @@ class NGramTrie:
         
         distance_matrix = np.stack([d for _, d in distances], axis=0)  # (n_rules, batch_size)
         # Get top 10 rules with smallest distances for each batch
-        top_10_indices = np.argsort(distance_matrix, axis=0)[:10]  # (10, batch_size)
-        top_10_rules = np.array([distances[i][0] for i in top_10_indices]).T  # (batch_size, 10)
+        top_10_indices = np.argsort(distance_matrix, axis=0)[:10].T  # (batch_size, 10)
+        print(top_10_indices)
+        top_10_rules = [[distances[i][0] for i in indices] for indices in top_10_indices]
+
+        print(top_10_rules)
+        print(token_seq)
         
         top_10_probs = []
         for token_seq, top_10_rules in zip(tokens, top_10_rules):
             response = requests.post(
                 f"{self.server_url}/smoothed_predict",
-                json={"history": token_seq.tolist(), "rules": top_10_rules.tolist()},
+                json={"history": token_seq.tolist(), "rules": top_10_rules},
                 headers={"Content-Type": "application/json"}
             )
             if response.status_code != 200:
                 raise RuntimeError(f"Server error: {response.text}")
             top_10_probs.append(response.json()["probabilities"])
-            
+
         top_10_probs = formatted_ngram_probs(top_10_probs, self.vocab_size)
             
         return {
@@ -114,6 +118,7 @@ class NGramTrie:
     
   
 if __name__ == "__main__":
+    from pathlib import Path
     from argparse import ArgumentParser
     from ngram_trie import PySmoothedTrie
     
@@ -138,6 +143,9 @@ if __name__ == "__main__":
     
     print(f"Fitting trie")
     trie.fit(tokens, n_gram_max_length=args.ngram_size, root_capacity=root_capacity)
+
+    file_path = CHECKPOINT_PATH / args.ngram_file
+    file_path.mkdir(exist_ok=True)
     
     print(f"Saving trie to {CHECKPOINT_PATH / args.ngram_file}")
-    trie.save(str(CHECKPOINT_PATH / args.ngram_file))
+    trie.save(str(file_path / "trie"))
