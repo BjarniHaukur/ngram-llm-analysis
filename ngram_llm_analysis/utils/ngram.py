@@ -126,7 +126,7 @@ if __name__ == "__main__":
     root_capacity = tokenizer.get_vocab_size()
 
     print(f"Instantiating trie")
-    trie = PySmoothedTrie(n_gram_max_length=args.ngram_size, root_capacity=root_capacity, smoothing_name=args.smoothing_name)
+    trie = PySmoothedTrie(n_gram_max_length=args.ngram_size, root_capacity=root_capacity)
     
     print(f"Fitting trie")
     trie.fit(tokens, n_gram_max_length=args.ngram_size, root_capacity=root_capacity, smoothing_name=args.smoothing_name)

@@ -17,7 +17,7 @@ class MemmapDataset(Dataset):
     """Reads tokens from a memmap file."""
     def __init__(self, dataset_file:str, tokenizer_name:str, num_tokens:int = 2048):
         self.memmap = np.memmap(
-            DATA_PATH / dataset_file.removesuffix(".txt") / (tokenizer_name + ".dat"),
+            DATA_PATH / (dataset_file.removesuffix(".txt") + "_delineated") / (tokenizer_name + ".dat"),
             dtype="uint16", mode="r"
         )
         self.num_tokens = num_tokens
