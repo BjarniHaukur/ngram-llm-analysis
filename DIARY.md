@@ -7,7 +7,11 @@ Project Manager: Jonas
 - **Number of hours this week: TBD**
 
 ### Boti
-- **Number of hours this week: TBD**
+- **Number of hours this week: 15h**
+- Fixed ngram smoothing implementation, still there might be some bugs
+- Fine tuned cache sizes and allocations
+- Finalizing presentation, gathering ngram metrics
+- Mock presentation with the group
 
 ### Jonas
 - **Number of hours this week: TBD**
