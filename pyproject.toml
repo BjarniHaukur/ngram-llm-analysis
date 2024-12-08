@@ -18,6 +18,6 @@ dependencies = [
     "tokenizers",
     "accelerate",
     "ipykernel>=6.29.5",
-    "ngram-trie>=1.2.5",
+    "ngram-trie>=1.2.6",
     "requests>=2.32.3",
 ]

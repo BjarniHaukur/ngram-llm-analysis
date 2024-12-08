@@ -618,7 +618,7 @@ requires-dist = [
     { name = "ipykernel" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "matplotlib" },
-    { name = "ngram-trie", specifier = ">=1.2.5" },
+    { name = "ngram-trie", specifier = ">=1.2.6" },
     { name = "numpy" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "tokenizers" },
@@ -632,11 +632,11 @@ requires-dist = [
 
 [[package]]
 name = "ngram-trie"
-version = "1.2.5"
+version = "1.2.6"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/37/ea/a7db131073c81ca4301457d3c93829d89b5afc6cb8dab354bd1702c075e2/ngram_trie-1.2.5.tar.gz", hash = "sha256:e6bca967e618ef40392073a3745626386d809bdfb613e8531ea8f41563ed2b5e", size = 32196 }
+sdist = { url = "https://files.pythonhosted.org/packages/64/77/d87440b8aa94fe96c4fd638a12bebbd999502d797795b7bf5cb45b237cfb/ngram_trie-1.2.6.tar.gz", hash = "sha256:8599f3c87f77748097d1eebf56f368777e423705ef8552d5526816e4587b35d1", size = 31678 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d9/89/95fe3f51b9a1c610ef07d368dce49f40bf83964ed289a0021c8b249d98a0/ngram_trie-1.2.5-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:ddc35f92bfd44118c078dae370047f52d5e69a13160a7c2d117f89b1452777b8", size = 895504 },
+    { url = "https://files.pythonhosted.org/packages/64/4c/3638ff82357262644637892df5a6ed3beab85aa1a0ece643a17cefa4a8a7/ngram_trie-1.2.6-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:530c28dd14793cd660b79c34558a80401aed0b908e0af29d123efbedbf919de4", size = 657555 },
 ]
 
 [[package]]
