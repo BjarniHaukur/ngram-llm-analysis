@@ -47,8 +47,10 @@ class NGramTrie:
 
         # Rest of the processing remains the same
         unsmoothed_all_probs = formatted_ngram_probs(unsmoothed_ngram_probs, self.vocab_size)
-        unsmoothed_subgram_probs = {k: v for k, v in unsmoothed_all_probs.items() if set(k) == {"+", "-"}}
-        unsmoothed_suffix_probs = {k: v for k, v in unsmoothed_all_probs.items() if set(k) == {"+"}}
+        # includes all rules with + or -
+        unsmoothed_subgram_probs = {k: v for k, v in unsmoothed_all_probs.items() if "*" not in k}
+        # includes all rules with only + or empty rule ("-")
+        unsmoothed_suffix_probs = {k: v for k, v in unsmoothed_all_probs.items() if ("*" not in k and "-" not in k) or ("-" == k)}
         
         smoothed_ngram_probs = []
         for token_seq in tokens:
@@ -62,8 +64,10 @@ class NGramTrie:
             smoothed_ngram_probs.append(response.json()["probabilities"])
             
         smoothed_all_probs = formatted_ngram_probs(smoothed_ngram_probs, self.vocab_size)
-        smoothed_subgram_probs = {k: v for k, v in smoothed_all_probs.items() if set(k) == {"+", "-"}}
-        smoothed_suffix_probs = {k: v for k, v in smoothed_all_probs.items() if set(k) == {"+"}}
+        # includes all rules with + or -
+        smoothed_subgram_probs = {k: v for k, v in smoothed_all_probs.items() if "*" not in k}
+        # includes all rules with only + or empty rule ("-")
+        smoothed_suffix_probs = {k: v for k, v in smoothed_all_probs.items() if ("*" not in k and "-" not in k) or ("-" == k)}
         
         return {
             **self.calculate_metrics(unsmoothed_all_probs, model_p, "unsmoothed_all"),
