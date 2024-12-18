@@ -157,7 +157,7 @@ def main(args):
         }, step=log_step)
         step_tqdm.set_postfix({"train_loss": f"{train_loss:.3f}", "val_loss": f"{val_loss:.3f}"})
 
-        if step % VAL_INTERVAL == 0 and step != 0:
+        if step % VAL_INTERVAL == 0:
             model.eval()
             step_tqdm.set_description("Validating...")
             with torch.no_grad():
