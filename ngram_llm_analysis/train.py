@@ -64,7 +64,7 @@ def main(args):
     CURRENT_STEP = 0
     STEPS_PER_EPOCH_TRAIN = len(train_ds) // args.batch_size  # Drop last is True
     TOTAL_STEPS = STEPS_PER_EPOCH_TRAIN * args.epochs
-    VAL_INTERVAL = STEPS_PER_EPOCH_TRAIN // 20  # sacricfice
+    VAL_INTERVAL = STEPS_PER_EPOCH_TRAIN // 40  # 2x
     NUM_VAL_STEPS = STEPS_PER_EPOCH_TRAIN // VAL_INTERVAL
     WARMUP_STEPS = int(0.03 * TOTAL_STEPS)
 
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train transformer model")
     parser.add_argument("--dataset", type=str, required=True, help="Name of dataset file. Type: .txt")
     parser.add_argument("--config", type=str, required=True, help="Name of the model configuration file. Type: .yaml")
-    parser.add_argument("--ngram_max_length", type=int, default=7, help="Maximum length of ngrams to use for smoothed trie.")
+    parser.add_argument("--ngram_max_length", type=int, default=8, help="Maximum length of ngrams to use for smoothed trie.")
     parser.add_argument("--run_name", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=5)
