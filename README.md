@@ -1,9 +1,13 @@
-# PyGPT
+# Understanding Transformers via _N_-gram statistics
+[Original Paper](https://www.arxiv.org/pdf/2407.12034)
 
+
+How do transformers relate to short context statistical patterns such as N-grams?
+
+## Setup Instructions
 Use python3.12.
 Be certain python3.12-dev and c compiler are installed (for torch.compile)
 
-## Setup Instructions
 
 First, install uv:
 ```bash
@@ -17,21 +21,35 @@ uv sync
 ```
 
 ## Download data
-- TODO
+Add data to `data/`
 
-## RUN
-cd into ngram_llm_analysis/
+## Usage
+Given wikipedia is a dataset in `data/`
 
-### Examples
-Training
+### Build Tokenizer
+```bash
+ uv run utils/tokenizer.py tinystories_1gb --name tinystories_1gb
 
-`uv run train.py --config llama_small --dataset small_train`
+```
 
-Building a specific tokenizer
+### Build Dataset
 
-`uv run utils/tokenizer.py <dataset> --name <tokenizer_name>`
+```bash
+#uv run utils/dataset.py [dataset] [tokenizer] --batch_size 100000
+uv run utils/dataset.py tinystories_1gb tinystories_1gb --delineate
+```
 
-Using the specialized tokenizer
-`uv run train.py --config llama_small --dataset small_train --tokenizer <tokenizer_name>`
+### Build Trie
 
+```bash
+uv run utils/ngram.py tinystories_1gb --tokenizer_name tinystories_1gb --ngram_file tinystories_1gb --ngram_size 8
+```
+### Start N-gram server
+```bash
+cargo run
+```
 
+### Train transformer and log metrics
+```bash
+uv run train.py --config llama_medium --dataset tinystories_1gb
+```
